@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /apacheta-portal-acceso.html
+Disallow: /apacheta-portal-inicio.html
+Disallow: /apacheta-portal-visor.html
+
+Sitemap: https://apachetaaerial.com/sitemap.xml

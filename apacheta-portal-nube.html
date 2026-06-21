@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="robots" content="noindex, nofollow"/>
+<title>Visor de nube de puntos · Apacheta Aerial</title>
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@200;300;400&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root{--void:#0A0908;--turquesa:#2A8F8A;--turquesa-bright:#46C7BE;--cobre:#C66B3D;--cobre-bright:#E89060;--beige:#E5DCC9;--beige-dim:rgba(229,220,201,.55);--beige-faint:rgba(229,220,201,.32);--hair:rgba(229,220,201,.14);}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;overflow:hidden;}
+  body{background:var(--void);color:var(--beige);font-family:"Sora",system-ui,sans-serif;font-weight:300;}
+  #cv{position:fixed;inset:0;width:100%;height:100%;display:block;cursor:grab;}
+  #cv:active{cursor:grabbing;}
+  .mono{font-family:"JetBrains Mono",monospace;}
+
+  /* top bar */
+  .bar{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:14px clamp(16px,4vw,34px);background:linear-gradient(180deg,rgba(10,9,8,.85),rgba(10,9,8,0));pointer-events:none;}
+  .bar > *{pointer-events:auto;}
+  .ttl{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--beige-dim);}
+  .ttl b{color:var(--beige);font-weight:500;}
+  .back{font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--beige-dim);text-decoration:none;border:1px solid var(--hair);border-radius:999px;padding:8px 14px;transition:all .2s;white-space:nowrap;}
+  .back:hover{color:var(--turquesa-bright);border-color:var(--turquesa);}
+
+  /* panel inferior izq */
+  .panel{position:fixed;left:clamp(14px,3vw,28px);bottom:clamp(14px,3vw,26px);z-index:20;background:rgba(13,12,11,.72);backdrop-filter:blur(8px);border:1px solid var(--hair);border-radius:14px;padding:16px 18px;min-width:230px;max-width:300px;}
+  .panel h3{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--turquesa-bright);font-weight:500;margin-bottom:12px;}
+  .row{display:flex;justify-content:space-between;font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.04em;color:var(--beige-dim);margin:5px 0;}
+  .row b{color:var(--beige);font-weight:400;}
+  .ctrl{margin-top:14px;}
+  .ctrl label{display:block;font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--beige-faint);margin-bottom:6px;}
+  input[type=range]{width:100%;accent-color:var(--turquesa);}
+  .btns{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;}
+  .btn{flex:1;font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--beige);background:rgba(42,143,138,.16);border:1px solid var(--turquesa);border-radius:8px;padding:9px 8px;cursor:pointer;transition:all .2s;white-space:nowrap;}
+  .btn:hover{background:rgba(42,143,138,.32);color:#fff;}
+
+  /* leyenda elevación */
+  .legend{margin-top:16px;}
+  .legbar{height:10px;border-radius:5px;background:linear-gradient(90deg,#1A3E3A,#2A8F8A 25%,#46C7BE 50%,#E5DCC9 70%,#E89060 88%,#C66B3D);}
+  .legrow{display:flex;justify-content:space-between;font-family:"JetBrains Mono",monospace;font-size:9px;letter-spacing:.08em;color:var(--beige-faint);margin-top:5px;}
+
+  /* hint */
+  .hint{position:fixed;right:clamp(14px,3vw,28px);bottom:clamp(14px,3vw,26px);z-index:20;font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.1em;color:var(--beige-faint);text-align:right;line-height:1.9;text-transform:uppercase;pointer-events:none;}
+
+  /* loader */
+  .loader{position:fixed;inset:0;z-index:40;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:var(--void);transition:opacity .6s;}
+  .loader.hide{opacity:0;pointer-events:none;}
+  .loader .lt{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--turquesa-bright);}
+  .loader .lp{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.1em;color:var(--beige-dim);}
+  .track{width:min(280px,60vw);height:2px;background:var(--hair);border-radius:2px;overflow:hidden;}
+  .fill{height:100%;width:0;background:var(--turquesa-bright);transition:width .2s;}
+  @media(max-width:640px){.hint{display:none;}.panel{min-width:0;max-width:46vw;padding:12px 13px;}}
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+
+<div class="bar">
+  <div class="ttl">Visor de nube de puntos · <b>TOPO 270523</b></div>
+  <a class="back" href="apacheta-portal-inicio.html">← Volver al panel</a>
+</div>
+
+<div class="panel">
+  <h3>Levantamiento RTK</h3>
+  <div class="row"><span>Puntos</span><b id="mPts">—</b></div>
+  <div class="row"><span>Desnivel</span><b id="mDz">—</b></div>
+  <div class="row"><span>Cota mín.</span><b id="mZmin">—</b></div>
+  <div class="row"><span>Cota máx.</span><b id="mZmax">—</b></div>
+  <div class="legend">
+    <div class="legbar"></div>
+    <div class="legrow"><span id="lZmin">—</span><span>Elevación (m)</span><span id="lZmax">—</span></div>
+  </div>
+  <div class="ctrl">
+    <label>Tamaño del punto</label>
+    <input id="sz" type="range" min="0.5" max="5" step="0.1" value="1.7"/>
+  </div>
+  <div class="btns">
+    <button class="btn" id="bReset">Reencuadrar</button>
+    <button class="btn" id="bSpin">Auto-giro</button>
+  </div>
+</div>
+
+<div class="hint">Arrastrar · rotar<br>Rueda · zoom<br>Click derecho · mover</div>
+
+<div class="loader" id="loader">
+  <div class="lt">Cargando nube de puntos</div>
+  <div class="track"><div class="fill" id="fill"></div></div>
+  <div class="lp" id="lp">0%</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+  var BIN='assets/topo_270523.bin', META='assets/topo_270523.json';
+  var renderer,scene,camera,points,raf,spin=false;
+  var target=new THREE.Vector3(0,0,0);
+  var sph={r:100,theta:Math.PI*0.25,phi:Math.PI*0.36}; // radius, azimut, polar
+  var cv=document.getElementById('cv');
+
+  function fmt(n){return n.toLocaleString('es-CL');}
+
+  // ---- carga: primero metadatos, luego binario ----
+  var META_D=null;
+  fetch(META).then(function(r){return r.json();}).then(function(meta){
+    META_D=meta;
+    document.getElementById('mZmin').textContent=meta.zmin.toFixed(1)+' m';
+    document.getElementById('mZmax').textContent=meta.zmax.toFixed(1)+' m';
+    document.getElementById('mDz').textContent=meta.zspan.toFixed(1)+' m';
+    document.getElementById('lZmin').textContent=Math.round(meta.zmin);
+    document.getElementById('lZmax').textContent=Math.round(meta.zmax);
+    return fetch(BIN);
+  }).then(function(resp){
+    var total=+resp.headers.get('Content-Length')||0;
+    var reader=resp.body.getReader(); var chunks=[],received=0;
+    function pump(){
+      return reader.read().then(function(res){
+        if(res.done){return new Blob(chunks).arrayBuffer();}
+        chunks.push(res.value); received+=res.value.length;
+        if(total){var pc=Math.round(received/total*100);
+          document.getElementById('fill').style.width=pc+'%';
+          document.getElementById('lp').textContent=pc+'%';}
+        return pump();
+      });
+    }
+    return pump();
+  }).then(function(buf){
+    build(buf,META_D); var l=document.getElementById('loader'); l.classList.add('hide'); setTimeout(function(){l.style.display='none';},600);
+  }).catch(function(e){
+    document.getElementById('lp').textContent='Error al cargar la nube';
+    console.error(e);
+  });
+
+  function build(buf,meta){
+    var dv=new DataView(buf);
+    var count=dv.getUint32(0,true);
+    var q=new Uint16Array(buf,4,count*3);
+    var qBytes=count*3*2;
+    var colorsU8=new Uint8Array(buf,4+qBytes,count*3);
+    var mn=meta.qmin, rg=meta.qrange;
+    var positions=new Float32Array(count*3);
+    for(var k=0;k<count;k++){
+      positions[k*3]   = q[k*3]  /65535*rg[0]+mn[0];
+      positions[k*3+1] = q[k*3+1]/65535*rg[1]+mn[1];
+      positions[k*3+2] = q[k*3+2]/65535*rg[2]+mn[2];
+    }
+    var colors=new Float32Array(count*3);
+    for(var i=0;i<colors.length;i++){colors[i]=colorsU8[i]/255;}
+
+    document.getElementById('mPts').textContent=fmt(count);
+
+    scene=new THREE.Scene();
+    scene.fog=new THREE.FogExp2(0x0A0908,0.00018);
+    var geo=new THREE.BufferGeometry();
+    geo.setAttribute('position',new THREE.BufferAttribute(positions,3));
+    geo.setAttribute('color',new THREE.BufferAttribute(colors,3));
+    geo.computeBoundingSphere();
+    var mat=new THREE.PointsMaterial({size:1.7,sizeAttenuation:false,vertexColors:true});
+    points=new THREE.Points(geo,mat); scene.add(points);
+
+    var rad=geo.boundingSphere.radius;
+    sph.r=rad*1.7;
+    camera=new THREE.PerspectiveCamera(55,window.innerWidth/window.innerHeight,rad*0.002,rad*40);
+
+    renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true});
+    renderer.setClearColor(0x0A0908,1);
+    resize();
+    bindControls(rad);
+    document.getElementById('sz').addEventListener('input',function(e){mat.size=parseFloat(e.target.value);});
+    document.getElementById('bReset').addEventListener('click',function(){sph={r:rad*1.7,theta:Math.PI*0.25,phi:Math.PI*0.36};target.set(0,0,0);});
+    document.getElementById('bSpin').addEventListener('click',function(e){spin=!spin;e.target.style.color=spin?'#46C7BE':'';});
+    window.addEventListener('resize',resize,{passive:true});
+    loop();
+  }
+
+  function resize(){
+    if(!renderer)return;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+    renderer.setSize(window.innerWidth,window.innerHeight);
+    camera.aspect=window.innerWidth/window.innerHeight; camera.updateProjectionMatrix();
+  }
+
+  function applyCam(){
+    var p=Math.max(0.05,Math.min(Math.PI-0.05,sph.phi));
+    var x=target.x+sph.r*Math.sin(p)*Math.cos(sph.theta);
+    var y=target.y+sph.r*Math.cos(p);
+    var z=target.z+sph.r*Math.sin(p)*Math.sin(sph.theta);
+    camera.position.set(x,y,z); camera.lookAt(target);
+  }
+
+  function bindControls(rad){
+    var dragging=false,btn=0,lx=0,ly=0;
+    cv.addEventListener('mousedown',function(e){dragging=true;btn=e.button;lx=e.clientX;ly=e.clientY;});
+    window.addEventListener('mouseup',function(){dragging=false;});
+    window.addEventListener('mousemove',function(e){
+      if(!dragging)return;
+      var dx=e.clientX-lx,dy=e.clientY-ly;lx=e.clientX;ly=e.clientY;
+      if(btn===2||e.shiftKey){ // pan
+        var panS=sph.r*0.0014;
+        var right=new THREE.Vector3(),up=new THREE.Vector3(0,1,0),dir=new THREE.Vector3();
+        camera.getWorldDirection(dir); right.crossVectors(dir,up).normalize();
+        var tup=new THREE.Vector3().crossVectors(right,dir).normalize();
+        target.addScaledVector(right,-dx*panS); target.addScaledVector(tup,dy*panS);
+      } else { sph.theta-=dx*0.005; sph.phi-=dy*0.005; }
+    });
+    cv.addEventListener('contextmenu',function(e){e.preventDefault();});
+    cv.addEventListener('wheel',function(e){e.preventDefault();sph.r*=(1+Math.sign(e.deltaY)*0.08);sph.r=Math.max(rad*0.05,Math.min(rad*25,sph.r));},{passive:false});
+    // touch
+    var tdist=0;
+    cv.addEventListener('touchstart',function(e){if(e.touches.length===1){lx=e.touches[0].clientX;ly=e.touches[0].clientY;}else if(e.touches.length===2){tdist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);}},{passive:true});
+    cv.addEventListener('touchmove',function(e){
+      if(e.touches.length===1){var dx=e.touches[0].clientX-lx,dy=e.touches[0].clientY-ly;lx=e.touches[0].clientX;ly=e.touches[0].clientY;sph.theta-=dx*0.006;sph.phi-=dy*0.006;}
+      else if(e.touches.length===2){var d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);if(tdist){sph.r*=tdist/d;sph.r=Math.max(rad*0.05,Math.min(rad*25,sph.r));}tdist=d;}
+    },{passive:true});
+  }
+
+  function loop(){raf=requestAnimationFrame(loop);if(spin)sph.theta+=0.0016;applyCam();renderer.render(scene,camera);}
+})();
+</script>
+</body>
+</html>

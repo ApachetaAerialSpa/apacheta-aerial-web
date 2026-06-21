@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="robots" content="noindex, nofollow"/>
+<title>Visor de modelo 3D · Apacheta Aerial</title>
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@200;300;400&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root{--void:#0A0908;--turquesa:#2A8F8A;--turquesa-bright:#46C7BE;--cobre:#C66B3D;--cobre-bright:#E89060;--beige:#E5DCC9;--beige-dim:rgba(229,220,201,.55);--beige-faint:rgba(229,220,201,.32);--hair:rgba(229,220,201,.14);}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;overflow:hidden;}
+  body{background:var(--void);color:var(--beige);font-family:"Sora",system-ui,sans-serif;font-weight:300;}
+  model-viewer{position:fixed;inset:0;width:100%;height:100%;--poster-color:#0A0908;background:radial-gradient(120% 90% at 50% 10%, #14110d 0%, #0A0908 70%);}
+
+  .bar{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:14px clamp(16px,4vw,34px);background:linear-gradient(180deg,rgba(10,9,8,.85),rgba(10,9,8,0));pointer-events:none;}
+  .bar > *{pointer-events:auto;}
+  .ttl{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--beige-dim);}
+  .ttl b{color:var(--beige);font-weight:500;}
+  .back{font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--beige-dim);text-decoration:none;border:1px solid var(--hair);border-radius:999px;padding:8px 14px;transition:all .2s;white-space:nowrap;}
+  .back:hover{color:var(--turquesa-bright);border-color:var(--turquesa);}
+
+  .panel{position:fixed;left:clamp(14px,3vw,28px);bottom:clamp(14px,3vw,26px);z-index:20;background:rgba(13,12,11,.72);backdrop-filter:blur(8px);border:1px solid var(--hair);border-radius:14px;padding:16px 18px;min-width:230px;max-width:300px;}
+  .panel h3{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--turquesa-bright);font-weight:500;margin-bottom:12px;}
+  .row{display:flex;justify-content:space-between;font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.04em;color:var(--beige-dim);margin:5px 0;}
+  .row b{color:var(--beige);font-weight:400;}
+  .legend{margin-top:16px;}
+  .legbar{height:10px;border-radius:5px;background:linear-gradient(90deg,#1A3E3A,#2A8F8A 25%,#46C7BE 50%,#E5DCC9 70%,#E89060 88%,#C66B3D);}
+  .legrow{display:flex;justify-content:space-between;font-family:"JetBrains Mono",monospace;font-size:9px;letter-spacing:.08em;color:var(--beige-faint);margin-top:5px;}
+  .btns{display:flex;gap:8px;margin-top:14px;}
+  .btn{flex:1;font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--beige);background:rgba(42,143,138,.16);border:1px solid var(--turquesa);border-radius:8px;padding:9px 8px;cursor:pointer;transition:all .2s;}
+  .btn:hover{background:rgba(42,143,138,.32);color:#fff;}
+
+  .hint{position:fixed;right:clamp(14px,3vw,28px);bottom:clamp(14px,3vw,26px);z-index:20;font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.1em;color:var(--beige-faint);text-align:right;line-height:1.9;text-transform:uppercase;pointer-events:none;}
+  @media(max-width:640px){.hint{display:none;}.panel{min-width:0;max-width:46vw;padding:12px 13px;}}
+
+  .progress{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:30;font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--turquesa-bright);}
+</style>
+</head>
+<body>
+<div class="bar">
+  <div class="ttl">Modelo 3D · <b>TOPO RAJO TIM</b></div>
+  <a class="back" href="apacheta-portal-inicio.html">← Volver al panel</a>
+</div>
+
+<model-viewer id="mv"
+  src="assets/topo_rajo.glb"
+  alt="Modelo 3D del rajo — Apacheta Aerial"
+  camera-controls
+  auto-rotate auto-rotate-delay="800" rotation-per-second="14deg"
+  interaction-prompt="none"
+  environment-image="neutral"
+  exposure="1.05"
+  shadow-intensity="0.45"
+  min-camera-orbit="auto auto auto"
+  max-camera-orbit="auto auto auto"
+  touch-action="none">
+  <div class="progress" slot="progress-bar" id="prog">Cargando modelo…</div>
+</model-viewer>
+
+<div class="panel">
+  <h3>Topografía de rajo</h3>
+  <div class="row"><span>Vértices</span><b id="mV">—</b></div>
+  <div class="row"><span>Caras</span><b id="mF">—</b></div>
+  <div class="row"><span>Desnivel</span><b id="mDz">—</b></div>
+  <div class="row"><span>Cota mín.</span><b id="mZmin">—</b></div>
+  <div class="row"><span>Cota máx.</span><b id="mZmax">—</b></div>
+  <div class="legend">
+    <div class="legbar"></div>
+    <div class="legrow"><span id="lZmin">—</span><span>Elevación (m)</span><span id="lZmax">—</span></div>
+  </div>
+  <div class="btns">
+    <button class="btn" id="bReset">Reencuadrar</button>
+    <button class="btn" id="bSpin">Auto-giro</button>
+  </div>
+</div>
+
+<div class="hint">Arrastrar · rotar<br>Rueda · zoom<br>Click derecho · mover</div>
+
+<script type="module" src="https://unpkg.com/@google/model-viewer@3.5.0/dist/model-viewer.min.js"></script>
+<script>
+  var mv=document.getElementById('mv');
+  fetch('assets/topo_rajo.json').then(function(r){return r.json();}).then(function(m){
+    var f=function(n){return n.toLocaleString('es-CL');};
+    document.getElementById('mV').textContent=f(m.verts);
+    document.getElementById('mF').textContent=f(m.faces);
+    document.getElementById('mDz').textContent=m.zspan.toFixed(1)+' m';
+    document.getElementById('mZmin').textContent=m.zmin.toFixed(1)+' m';
+    document.getElementById('mZmax').textContent=m.zmax.toFixed(1)+' m';
+    document.getElementById('lZmin').textContent=Math.round(m.zmin);
+    document.getElementById('lZmax').textContent=Math.round(m.zmax);
+  }).catch(function(){});
+  mv.addEventListener('load',function(){var p=document.getElementById('prog');if(p)p.style.display='none';});
+  var spinning=true;
+  document.getElementById('bSpin').addEventListener('click',function(e){
+    spinning=!spinning;
+    if(spinning){mv.setAttribute('auto-rotate','');e.target.style.color='#46C7BE';}
+    else{mv.removeAttribute('auto-rotate');e.target.style.color='';}
+  });
+  document.getElementById('bReset').addEventListener('click',function(){
+    mv.cameraOrbit='auto auto auto'; mv.fieldOfView='auto'; mv.jumpCameraToGoal && mv.jumpCameraToGoal();
+  });
+  document.getElementById('bSpin').style.color='#46C7BE';
+</script>
+</body>
+</html>

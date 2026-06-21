@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="robots" content="noindex, nofollow"/>
+<title>Visor SIG · Apacheta Aerial</title>
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@200;300;400&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<style>
+  :root{--void:#0A0908;--turquesa:#2A8F8A;--turquesa-bright:#46C7BE;--cobre:#C66B3D;--cobre-bright:#E89060;--beige:#E5DCC9;--beige-dim:rgba(229,220,201,.55);--beige-faint:rgba(229,220,201,.34);--hair:rgba(229,220,201,.14);}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;overflow:hidden;}
+  body{background:var(--void);color:var(--beige);font-family:"Sora",system-ui,sans-serif;font-weight:300;}
+  #map{position:fixed;inset:0;width:100%;height:100%;background:#11100e;}
+  .leaflet-container{background:#11100e;font-family:"JetBrains Mono",monospace;}
+  .mono{font-family:"JetBrains Mono",monospace;}
+
+  .bar{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;justify-content:space-between;align-items:center;gap:14px;padding:11px clamp(14px,3vw,26px);background:linear-gradient(180deg,rgba(10,9,8,.92),rgba(10,9,8,.45) 70%,rgba(10,9,8,0));pointer-events:none;}
+  .bar>*{pointer-events:auto;}
+  .ttl{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--beige-dim);white-space:nowrap;}
+  .ttl b{color:var(--beige);font-weight:500;}
+  .bar-right{display:flex;align-items:center;gap:12px;}
+  .readout{font-family:"JetBrains Mono",monospace;font-size:10.5px;color:var(--beige);background:rgba(13,12,11,.78);backdrop-filter:blur(8px);border:1px solid var(--hair);border-radius:8px;padding:6px 11px;line-height:1.55;white-space:nowrap;min-width:230px;}
+  .readout .k{color:var(--turquesa-bright);}
+  .readout .v{color:var(--beige);}
+  .readout .z{color:var(--cobre-bright);}
+  .navlnk{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--beige-dim);text-decoration:none;border:1px solid var(--hair);border-radius:999px;padding:7px 13px;transition:all .18s;white-space:nowrap;}
+  .navlnk:hover{color:var(--turquesa-bright);border-color:var(--turquesa);}
+  .navlnk.logout:hover{color:var(--cobre-bright);border-color:var(--cobre);}
+
+  .panel{position:fixed;z-index:1000;background:rgba(13,12,11,.82);backdrop-filter:blur(10px);border:1px solid var(--hair);border-radius:13px;padding:13px 14px;width:266px;}
+  .panel.left{left:clamp(12px,2.5vw,22px);top:58px;max-height:calc(100vh - 78px);overflow-y:auto;}
+  .panel h3{font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--turquesa-bright);font-weight:500;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;}
+  .grp{border-top:1px solid var(--hair);margin-top:12px;padding-top:11px;}
+  .addbtns{display:flex;flex-direction:column;gap:7px;}
+  .btn{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--beige);background:rgba(42,143,138,.16);border:1px solid var(--turquesa);border-radius:8px;padding:9px;cursor:pointer;transition:all .18s;width:100%;text-align:center;}
+  .btn:hover{background:rgba(42,143,138,.34);color:#fff;}
+  .btn.cobre{background:rgba(198,107,61,.16);border-color:var(--cobre);}
+  .btn.cobre:hover{background:rgba(198,107,61,.34);}
+  .btn[disabled]{opacity:.4;cursor:not-allowed;}
+
+  .layer{border:1px solid var(--hair);border-radius:9px;padding:8px 9px;margin-top:8px;background:rgba(10,9,8,.4);}
+  .layer .lh{display:flex;align-items:center;gap:8px;}
+  .layer .nm{font-family:"JetBrains Mono",monospace;font-size:10.5px;color:var(--beige);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .layer .tag{font-family:"JetBrains Mono",monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--void);border-radius:4px;padding:2px 5px;}
+  .layer .tag.r{background:var(--cobre-bright);}
+  .layer .tag.v{background:var(--turquesa-bright);}
+  .layer .lc{display:flex;align-items:center;gap:8px;margin-top:7px;}
+  .layer input[type=range]{flex:1;accent-color:var(--turquesa);height:16px;}
+  .iconbtn{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--beige-dim);background:none;border:none;cursor:pointer;padding:2px 4px;border-radius:4px;}
+  .iconbtn:hover{color:var(--turquesa-bright);}
+  .iconbtn.rm:hover{color:var(--cobre-bright);}
+  .sw{display:flex;align-items:center;gap:8px;font-family:"JetBrains Mono",monospace;font-size:10.5px;color:var(--beige-dim);cursor:pointer;margin:7px 0;}
+  .sw input{accent-color:var(--turquesa);width:15px;height:15px;}
+  .rowsel{display:flex;align-items:center;justify-content:space-between;font-family:"JetBrains Mono",monospace;font-size:10px;color:var(--beige-dim);margin:8px 0;gap:8px;}
+  select{background:rgba(10,9,8,.78);border:1px solid var(--hair);color:var(--beige);border-radius:6px;padding:6px 7px;font-family:"JetBrains Mono",monospace;font-size:10px;flex:1;}
+  .muted{font-family:"JetBrains Mono",monospace;font-size:9px;color:var(--beige-faint);letter-spacing:.03em;line-height:1.6;margin-top:8px;}
+  .empty{font-family:"JetBrains Mono",monospace;font-size:9.5px;color:var(--beige-faint);text-align:center;padding:10px 4px;line-height:1.6;}
+
+  .gridlbl{font-family:"JetBrains Mono",monospace;font-size:9px;color:var(--turquesa-bright);text-shadow:0 0 3px #000,0 0 3px #000;white-space:nowrap;}
+  .toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:1200;font-family:"JetBrains Mono",monospace;font-size:10.5px;color:var(--beige);background:rgba(13,12,11,.92);border:1px solid var(--hair);border-radius:8px;padding:9px 14px;opacity:0;transition:opacity .3s;pointer-events:none;max-width:80vw;text-align:center;}
+  .toast.show{opacity:1;}
+  .leaflet-control-zoom a{background:rgba(13,12,11,.85)!important;color:var(--beige)!important;border-color:var(--hair)!important;}
+  .leaflet-bar a:hover{background:rgba(42,143,138,.4)!important;}
+  .hint{position:fixed;left:50%;bottom:12px;transform:translateX(-50%);z-index:900;font-family:"JetBrains Mono",monospace;font-size:9px;letter-spacing:.06em;color:var(--beige-faint);text-transform:uppercase;pointer-events:none;}
+  @media(max-width:720px){.panel.left{width:210px;}.readout{display:none;}}
+</style>
+</head>
+<body>
+<div id="map"></div>
+
+<div class="bar">
+  <div class="ttl">Visor SIG · <b>Apacheta Aerial</b></div>
+  <div class="bar-right">
+    <div class="readout" id="readout"><span class="k">geo</span> <span class="v" id="rGeo">—</span><br><span class="k">utm</span> <span class="z" id="rZone">19S</span> <span class="v" id="rUtm">—</span></div>
+    <a class="navlnk" href="apacheta-portal-inicio.html">← Volver al panel</a>
+    <a class="navlnk logout" href="apacheta-portal-acceso.html">Cerrar sesión</a>
+  </div>
+</div>
+
+<div class="panel left">
+  <h3>Capas</h3>
+  <div class="addbtns">
+    <button class="btn cobre" id="addTif">+ Imagen GeoTIFF (.tif)</button>
+    <button class="btn" id="addShp">+ Shapefile (.zip)</button>
+  </div>
+  <input type="file" id="fTif" accept=".tif,.tiff" style="display:none"/>
+  <input type="file" id="fShp" accept=".zip" style="display:none"/>
+  <div id="layerList"><div class="empty" id="emptyMsg">Sin capas aún.<br>Carga un GeoTIFF o un Shapefile (.zip con .shp .shx .dbf .prj).</div></div>
+
+  <div class="grp">
+    <h3 style="margin-bottom:8px;">Coordenadas · Zona UTM</h3>
+    <div class="rowsel">
+      <span>Zona</span>
+      <select id="utmSel">
+        <option value="32719">19S · EPSG:32719</option>
+        <option value="32718">18S · EPSG:32718</option>
+        <option value="32717">17S · EPSG:32717</option>
+        <option value="32712">12S · EPSG:32712 (Rapa Nui)</option>
+      </select>
+    </div>
+    <label class="sw"><input type="checkbox" id="gridChk"> Mostrar grilla geográfica</label>
+    <div class="muted">Pasa el mouse por el mapa: arriba verás Lat/Lon y UTM (E/N) en la zona elegida.</div>
+  </div>
+
+  <div class="grp">
+    <h3 style="margin-bottom:8px;">Mapa base</h3>
+    <div class="rowsel">
+      <span>Base</span>
+      <select id="baseSel">
+        <option value="sat">Satélite (Esri)</option>
+        <option value="osm">Calles (OSM)</option>
+        <option value="topo">Topográfico</option>
+        <option value="none">Sin base (oscuro)</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<div class="hint">Arrastra · mueve mapa · Rueda · zoom</div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.0/proj4.js"></script>
+<script src="https://unpkg.com/georaster@1.6.0/dist/georaster.browser.bundle.min.js"></script>
+<script src="https://unpkg.com/georaster-layer-for-leaflet@3.10.0/dist/georaster-layer-for-leaflet.min.js"></script>
+<script src="https://unpkg.com/shpjs@4.0.4/dist/shp.min.js"></script>
+<script>
+(function(){
+  "use strict";
+  var ZONES={
+    '32719':{label:'19S','def':'+proj=utm +zone=19 +south +datum=WGS84 +units=m +no_defs'},
+    '32718':{label:'18S','def':'+proj=utm +zone=18 +south +datum=WGS84 +units=m +no_defs'},
+    '32717':{label:'17S','def':'+proj=utm +zone=17 +south +datum=WGS84 +units=m +no_defs'},
+    '32712':{label:'12S','def':'+proj=utm +zone=12 +south +datum=WGS84 +units=m +no_defs'}
+  };
+  Object.keys(ZONES).forEach(function(epsg){ if(window.proj4) proj4.defs('EPSG:'+epsg, ZONES[epsg].def); });
+  var curEpsg='32719';
+
+  var map=L.map('map',{zoomControl:true,attributionControl:false}).setView([-33.45,-70.66],6);
+  L.control.scale({imperial:false,position:'bottomright'}).addTo(map);
+
+  var bases={
+    sat:L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19}),
+    osm:L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}),
+    topo:L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',{maxZoom:17}),
+    none:null
+  };
+  var curBase=bases.sat; curBase.addTo(map);
+  document.getElementById('baseSel').addEventListener('change',function(e){
+    if(curBase){ map.removeLayer(curBase); }
+    curBase=bases[e.target.value];
+    if(curBase){ curBase.addTo(map); curBase.bringToBack(); }
+  });
+
+  var toastEl=document.getElementById('toast'), toastT;
+  function toast(msg,ms){ toastEl.textContent=msg; toastEl.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(function(){toastEl.classList.remove('show');}, ms||3200); }
+
+  var rGeo=document.getElementById('rGeo'), rUtm=document.getElementById('rUtm'), rZone=document.getElementById('rZone');
+  function fmt(n,d){ return n.toLocaleString('es-CL',{minimumFractionDigits:d,maximumFractionDigits:d}); }
+  map.on('mousemove',function(e){
+    var lat=e.latlng.lat, lng=e.latlng.lng;
+    rGeo.textContent=fmt(lat,5)+', '+fmt(lng,5);
+    try{ var p=proj4('EPSG:4326','EPSG:'+curEpsg,[lng,lat]); rUtm.textContent='E '+fmt(p[0],1)+'  N '+fmt(p[1],1); }
+    catch(err){ rUtm.textContent='—'; }
+  });
+  map.on('mouseout',function(){ rGeo.textContent='—'; rUtm.textContent='—'; });
+  document.getElementById('utmSel').addEventListener('change',function(e){ curEpsg=e.target.value; rZone.textContent=ZONES[curEpsg].label; });
+
+  var gridOn=false, gridGroup=L.layerGroup();
+  function niceStep(z){ if(z<4)return 10; if(z<6)return 5; if(z<8)return 1; if(z<10)return .5; if(z<12)return .1; if(z<14)return .05; if(z<16)return .01; return .005; }
+  function drawGrid(){
+    gridGroup.clearLayers(); if(!gridOn) return;
+    var b=map.getBounds(), step=niceStep(map.getZoom());
+    var s=Math.floor(b.getSouth()/step)*step, n=Math.ceil(b.getNorth()/step)*step;
+    var w=Math.floor(b.getWest()/step)*step, e=Math.ceil(b.getEast()/step)*step;
+    var dec=step<.01?3:(step<1?2:0);
+    var style={color:'#46C7BE',weight:.6,opacity:.35,interactive:false};
+    for(var la=s; la<=n+1e-9; la+=step){
+      L.polyline([[la,b.getWest()],[la,b.getEast()]],style).addTo(gridGroup);
+      L.marker([la,b.getWest()],{interactive:false,icon:L.divIcon({className:'gridlbl',html:la.toFixed(dec)+'°',iconSize:[60,12],iconAnchor:[-4,6]})}).addTo(gridGroup);
+    }
+    for(var lo=w; lo<=e+1e-9; lo+=step){
+      L.polyline([[b.getSouth(),lo],[b.getNorth(),lo]],style).addTo(gridGroup);
+      L.marker([b.getNorth(),lo],{interactive:false,icon:L.divIcon({className:'gridlbl',html:lo.toFixed(dec)+'°',iconSize:[60,12],iconAnchor:[20,-2]})}).addTo(gridGroup);
+    }
+  }
+  document.getElementById('gridChk').addEventListener('change',function(e){
+    gridOn=e.target.checked;
+    if(gridOn){ gridGroup.addTo(map); drawGrid(); } else { gridGroup.clearLayers(); map.removeLayer(gridGroup); }
+  });
+  map.on('moveend zoomend',function(){ if(gridOn) drawGrid(); });
+
+  var layerList=document.getElementById('layerList'), emptyMsg=document.getElementById('emptyMsg');
+  var uid=0;
+  function refreshEmpty(){ emptyMsg.style.display = layerList.querySelectorAll('.layer').length ? 'none':'block'; }
+  function addLayerRow(opts){
+    var id='ly'+(++uid);
+    var row=document.createElement('div'); row.className='layer'; row.id=id;
+    row.innerHTML=''+
+      '<div class="lh">'+
+        '<input type="checkbox" checked title="Mostrar/ocultar">'+
+        '<span class="nm" title="'+opts.name.replace(/"/g,'')+'">'+opts.name+'</span>'+
+        '<span class="tag '+opts.type+'">'+(opts.type==='r'?'RASTER':'VECTOR')+'</span>'+
+      '</div>'+
+      '<div class="lc">'+
+        '<span class="mono" style="font-size:9px;color:var(--beige-faint)">opac</span>'+
+        '<input type="range" min="0" max="100" value="100">'+
+        '<button class="iconbtn zoom" title="Centrar">&#8853;</button>'+
+        '<button class="iconbtn rm" title="Quitar">&#10005;</button>'+
+      '</div>';
+    layerList.appendChild(row); refreshEmpty();
+    var chk=row.querySelector('input[type=checkbox]'), rng=row.querySelector('input[type=range]');
+    chk.addEventListener('change',function(){ if(chk.checked){ opts.leaflet.addTo(map);} else { map.removeLayer(opts.leaflet); } });
+    rng.addEventListener('input',function(){ opts.setOpacity(parseInt(rng.value,10)/100); });
+    row.querySelector('.zoom').addEventListener('click',function(){ if(opts.bounds && opts.bounds.isValid && opts.bounds.isValid()) map.fitBounds(opts.bounds,{padding:[30,30]}); });
+    row.querySelector('.rm').addEventListener('click',function(){ map.removeLayer(opts.leaflet); row.remove(); refreshEmpty(); });
+  }
+
+  var addTifBtn=document.getElementById('addTif'), fTif=document.getElementById('fTif');
+  if(typeof parseGeoraster==='undefined' || typeof GeoRasterLayer==='undefined'){ addTifBtn.disabled=true; addTifBtn.title='Librería GeoTIFF no disponible'; }
+  addTifBtn.addEventListener('click',function(){ fTif.click(); });
+  fTif.addEventListener('change',function(){
+    var file=fTif.files[0]; if(!file) return; toast('Procesando '+file.name+' …', 8000);
+    file.arrayBuffer().then(function(ab){ return parseGeoraster(ab); }).then(function(gr){
+      var layer=new GeoRasterLayer({georaster:gr, opacity:1, resolution:256});
+      layer.addTo(map);
+      var b=layer.getBounds(); if(b&&b.isValid()) map.fitBounds(b,{padding:[30,30]});
+      addLayerRow({name:file.name, type:'r', leaflet:layer, bounds:b, setOpacity:function(o){ layer.setOpacity(o); }});
+      toast('GeoTIFF cargado: '+file.name);
+    }).catch(function(err){ console.error(err); toast('No se pudo leer el GeoTIFF. ¿Es un .tif georreferenciado?'); });
+    fTif.value='';
+  });
+
+  var addShpBtn=document.getElementById('addShp'), fShp=document.getElementById('fShp');
+  if(typeof shp==='undefined'){ addShpBtn.disabled=true; addShpBtn.title='Librería Shapefile no disponible'; }
+  function styleVec(){ return {color:'#46C7BE',weight:2,opacity:.95,fillColor:'#2A8F8A',fillOpacity:.25}; }
+  addShpBtn.addEventListener('click',function(){ fShp.click(); });
+  fShp.addEventListener('change',function(){
+    var file=fShp.files[0]; if(!file) return; toast('Procesando '+file.name+' …', 8000);
+    file.arrayBuffer().then(function(ab){ return shp(ab); }).then(function(geojson){
+      var gj=L.geoJSON(geojson,{style:styleVec,
+        pointToLayer:function(f,ll){ return L.circleMarker(ll,{radius:5,color:'#E89060',weight:2,fillColor:'#C66B3D',fillOpacity:.6}); },
+        onEachFeature:function(f,l){ if(f.properties){ var h='';for(var k in f.properties){ h+='<b>'+k+':</b> '+f.properties[k]+'<br>'; } if(h) l.bindPopup('<div style="font-family:monospace;font-size:11px">'+h+'</div>'); } }
+      });
+      gj.addTo(map);
+      var b=gj.getBounds(); if(b&&b.isValid()) map.fitBounds(b,{padding:[30,30]});
+      addLayerRow({name:file.name, type:'v', leaflet:gj, bounds:b, setOpacity:function(o){ gj.eachLayer(function(l){ if(l.setStyle) l.setStyle({opacity:o,fillOpacity:o*0.4}); }); }});
+      toast('Shapefile cargado: '+file.name);
+    }).catch(function(err){ console.error(err); toast('No se pudo leer el Shapefile. Sube un .zip con .shp .shx .dbf (.prj recomendado).'); });
+    fShp.value='';
+  });
+})();
+</script>
+</body>
+</html>

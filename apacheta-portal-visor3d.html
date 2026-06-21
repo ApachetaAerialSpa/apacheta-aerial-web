@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="robots" content="noindex, nofollow"/>
+<title>Visor topográfico · Apacheta Aerial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@200;300;400&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root{--void:#0A0908;--turquesa:#2A8F8A;--turquesa-bright:#46C7BE;--cobre:#C66B3D;--cobre-bright:#E89060;--beige:#E5DCC9;--beige-dim:rgba(229,220,201,.55);--beige-faint:rgba(229,220,201,.34);--hair:rgba(229,220,201,.14);}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;overflow:hidden;}
+  body{background:var(--void);color:var(--beige);font-family:"Sora",system-ui,sans-serif;font-weight:300;}
+  #cv{position:fixed;inset:0;width:100%;height:100%;display:block;}
+  .mono{font-family:"JetBrains Mono",monospace;}
+  .bar{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:13px clamp(16px,4vw,30px);background:linear-gradient(180deg,rgba(10,9,8,.9),rgba(10,9,8,0));pointer-events:none;}
+  .bar>*{pointer-events:auto;}
+  .ttl{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--beige-dim);}
+  .ttl b{color:var(--beige);font-weight:500;}
+
+  .tools{position:fixed;top:50px;left:clamp(12px,3vw,24px);z-index:20;display:flex;flex-direction:column;gap:6px;}
+  .tool{display:flex;align-items:center;gap:9px;font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--beige-dim);background:rgba(13,12,11,.72);backdrop-filter:blur(8px);border:1px solid var(--hair);border-radius:9px;padding:7px 12px;cursor:pointer;transition:all .18s;min-width:138px;}
+  .tool:hover{color:var(--beige);border-color:var(--turquesa);}
+  .tool.on{color:var(--void);background:var(--turquesa);border-color:var(--turquesa);font-weight:500;}
+  .tool .k{width:14px;text-align:center;}
+
+  .pnl{position:fixed;z-index:20;background:rgba(13,12,11,.74);backdrop-filter:blur(9px);border:1px solid var(--hair);border-radius:13px;padding:14px 16px;width:248px;}
+  .pnl h3{font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--turquesa-bright);font-weight:500;margin-bottom:11px;display:flex;align-items:center;justify-content:space-between;}
+  .pnl.right{right:clamp(12px,3vw,24px);top:54px;}
+  .pnl.legend{right:clamp(12px,3vw,24px);top:auto;bottom:clamp(12px,3vw,22px);max-height:calc(100vh - 70px);overflow-y:auto;}
+  .row{display:flex;justify-content:space-between;align-items:center;font-family:"JetBrains Mono",monospace;font-size:10.5px;color:var(--beige-dim);margin:7px 0;gap:8px;}
+  .row b{color:var(--beige);font-weight:400;}
+  .res{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--beige);line-height:1.7;min-height:20px;}
+  .res .hl{color:var(--turquesa-bright);}
+  .muted{font-family:"JetBrains Mono",monospace;font-size:9.5px;color:var(--beige-faint);letter-spacing:.04em;line-height:1.6;}
+  input[type=range]{width:100%;accent-color:var(--turquesa);height:18px;}
+  input[type=number]{width:74px;background:rgba(10,9,8,.6);border:1px solid var(--hair);color:var(--beige);border-radius:6px;padding:5px 7px;font-family:"JetBrains Mono",monospace;font-size:10.5px;}
+  select{background:rgba(10,9,8,.75);border:1px solid var(--hair);color:var(--beige);border-radius:6px;padding:6px 8px;font-family:"JetBrains Mono",monospace;font-size:10.5px;}
+  .legbar{height:11px;border-radius:6px;background:linear-gradient(90deg,#1A3E3A,#2A8F8A 25%,#46C7BE 50%,#E5DCC9 70%,#E89060 88%,#C66B3D);margin:8px 0 5px;}
+  .legbar.thermal{background:linear-gradient(90deg,#2c3e9e,#1e9adf,#36d39b,#f4e04d,#f08c2e,#d83a2e);}
+  .legbar.ert{background:linear-gradient(90deg,#08306b,#2171b5,#41ab5d,#fee08b,#f46d43,#a50026);}
+  .pnl.geo{left:clamp(12px,3vw,24px);top:352px;width:210px;max-height:calc(100vh - 366px);overflow-y:auto;}
+  .legrow{display:flex;justify-content:space-between;font-family:"JetBrains Mono",monospace;font-size:9px;color:var(--beige-faint);}
+  .clbl{position:fixed;z-index:14;transform:translate(-50%,-50%);font-family:"JetBrains Mono",monospace;font-size:9px;color:var(--beige);background:rgba(10,9,8,.45);padding:0 3px;border-radius:3px;pointer-events:none;white-space:nowrap;}
+  .glbl{position:fixed;z-index:14;transform:translate(-50%,-50%);font-family:"JetBrains Mono",monospace;font-size:9px;color:var(--turquesa-bright);background:rgba(10,9,8,.5);padding:0 3px;border-radius:3px;pointer-events:none;white-space:nowrap;}
+  .sw{display:flex;align-items:center;gap:8px;font-family:"JetBrains Mono",monospace;font-size:10.5px;color:var(--beige-dim);cursor:pointer;}
+  .sw input{accent-color:var(--turquesa);width:15px;height:15px;}
+  .btn{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--beige);background:rgba(42,143,138,.16);border:1px solid var(--turquesa);border-radius:7px;padding:8px;cursor:pointer;transition:all .18s;width:100%;}
+  .btn:hover{background:rgba(42,143,138,.32);color:#fff;}
+  .lbl{position:fixed;z-index:15;transform:translate(-50%,-130%);font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.02em;color:var(--beige);background:rgba(10,9,8,.82);border:1px solid var(--hair);border-radius:6px;padding:3px 7px;white-space:nowrap;pointer-events:none;}
+  .lbl.tq{color:var(--turquesa-bright);border-color:rgba(42,143,138,.5);}
+  .lbl.cb{color:var(--cobre-bright);border-color:rgba(198,107,61,.5);}
+  .hint{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:15;font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.08em;color:var(--beige-faint);text-transform:uppercase;pointer-events:none;text-align:center;}
+  .loader{position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;background:var(--void);font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--turquesa-bright);transition:opacity .5s;}
+  .loader.hide{opacity:0;pointer-events:none;}
+  @media(max-width:760px){.pnl{width:200px;}.tool{min-width:120px;}}
+  .navlnk{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--beige-dim);text-decoration:none;border:1px solid var(--hair);border-radius:999px;padding:7px 13px;transition:all .18s;white-space:nowrap;}
+  .navlnk:hover{color:var(--turquesa-bright);border-color:var(--turquesa);}
+  .navlnk.logout:hover{color:var(--cobre-bright);border-color:var(--cobre);}
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+
+<div class="bar">
+  <div class="ttl">Visor topográfico · <b>TOPO RAJO TIM</b></div>
+  <div style="display:flex;align-items:center;gap:14px;"><div class="ttl" id="coordReadout"></div><a class="navlnk" href="apacheta-portal-inicio.html">← Volver al panel</a><a class="navlnk logout" href="apacheta-portal-acceso.html">Cerrar sesión</a></div>
+</div>
+
+<div class="tools" id="tools">
+  <div class="tool on" data-mode="nav"><span class="k">✥</span> Navegar</div>
+  <div class="tool" data-mode="dist"><span class="k">↔</span> Distancia</div>
+  <div class="tool" data-mode="height"><span class="k">↕</span> Altura / cota</div>
+  <div class="tool" data-mode="poly"><span class="k">⬡</span> Polígono área</div>
+  <div class="tool" data-mode="profile"><span class="k">⌁</span> Perfil</div>
+  <div class="tool" data-mode="coord"><span class="k">◎</span> Coordenadas</div>
+  <div class="tool" data-mode="clear" id="clearBtn"><span class="k">⌫</span> Limpiar</div>
+</div>
+
+<div class="pnl geo">
+  <h3>Capas</h3>
+  <label class="sw" style="margin-bottom:6px;"><input type="checkbox" id="srfOn" checked> Modelo 3D (superficie)</label>
+  <div class="muted" style="margin:0 0 11px;border-bottom:1px solid var(--hair);padding-bottom:9px;">Apaga la superficie para ver la ERT/IP o solo las curvas.</div>
+  <label class="sw" style="margin-bottom:8px;"><input type="checkbox" id="thOn"> Termografía aérea</label>
+  <div class="legbar thermal" style="height:9px;margin:0 0 4px;"></div>
+  <div class="legrow"><span>8 °C</span><span>34 °C</span></div>
+  <label class="sw" style="margin:13px 0 8px;"><input type="checkbox" id="ertOn"> Hidro-geofísica ERT/IP</label>
+  <div class="legbar ert" style="height:9px;margin:0 0 4px;"></div>
+  <div class="legrow"><span>10 Ω·m</span><span>5000 Ω·m</span></div>
+  <label class="sw" style="margin:13px 0 6px;"><input type="checkbox" id="ert3dOn"> ERT/IP 3D interpolado</label>
+  <div class="row"><span>Opacidad 3D</span><input type="range" id="ert3dOp" min="0.2" max="1" step="0.05" value="1" style="width:92px;"></div>
+  <div class="muted" style="margin-top:9px;">Conductivo (agua/alteración) → resistivo (roca). Datos simulados para demo.</div>
+</div>
+
+<div class="pnl right">
+  <h3>Resultado</h3>
+  <div class="res" id="result">Elige una herramienta y haz clic sobre el terreno.</div>
+  <div class="muted" id="polyHint" style="margin-top:9px;display:none;"></div>
+</div>
+
+<div class="pnl legend">
+  <h3>Leyenda de elevación <span class="mono" id="cuotaUnit" style="color:var(--beige-faint)">m</span></h3>
+  <div class="legbar"></div>
+  <div class="legrow"><span id="legLo">—</span><span id="legHi">—</span></div>
+  <div class="row"><span>Cota mín.</span><input type="number" id="zlo" step="1"></div>
+  <div class="row"><span>Cota máx.</span><input type="number" id="zhi" step="1"></div>
+  <button class="btn" id="zauto" style="margin:4px 0 12px;">Rango automático</button>
+  <h3 style="margin-top:4px;">Curvas de nivel</h3>
+  <label class="sw" style="margin-bottom:9px;"><input type="checkbox" id="ctOn"> Mostrar curvas</label>
+  <div class="row"><span>Intervalo</span>
+    <select id="ctIv">
+      <option value="5">cada 5 m</option>
+      <option value="10" selected>cada 10 m</option>
+      <option value="25">cada 25 m</option>
+      <option value="50">cada 50 m</option>
+      <option value="100">cada 100 m</option>
+    </select>
+  </div>
+  <div class="row"><span>Color</span><input type="color" id="ctColor" value="#0a0908" style="width:42px;height:24px;padding:0;border:1px solid var(--hair);background:none;"></div>
+  <div class="row"><span>Grosor</span><select id="ctW"><option value="1">fino</option><option value="2">medio</option><option value="3">grueso</option></select></div>
+  <div class="row"><span>Opacidad</span><input type="range" id="ctOp" min="0.15" max="1" step="0.05" value="0.55" style="width:96px;"></div>
+  <h3 style="margin-top:6px;">Grilla y coordenadas</h3>
+  <label class="sw" style="margin-bottom:8px;"><input type="checkbox" id="gridOn"> Mostrar grilla (500 m)</label>
+  <div class="row"><span>Sistema</span>
+    <select id="coordSys"><option value="local">Local (m)</option><option value="utm">UTM 19S</option><option value="geo">Geográficas</option></select></div>
+  <div class="muted" style="margin-top:6px;">UTM/Geo: georref. demo (pendiente real).</div>
+</div>
+
+<div class="pnl" id="profPanel" style="display:none;left:50%;transform:translateX(-50%);bottom:44px;width:min(680px,92vw);">
+  <h3 style="margin-bottom:8px;"><span id="profTitle">Perfil</span><span class="muted" id="profClose" style="cursor:pointer;pointer-events:auto;">cerrar ✕</span></h3>
+  <canvas id="profCv" width="660" height="210" style="width:100%;height:auto;display:block;border-radius:8px;background:#0d0c0b;"></canvas>
+</div>
+<div id="actionBar" style="position:fixed;left:50%;top:46px;transform:translateX(-50%);z-index:25;display:flex;gap:8px;">
+  <button class="btn" id="closePoly" style="display:none;width:auto;padding:10px 20px;font-size:11px;">Cerrar polígono</button>
+  <button class="btn" id="showProfile" style="display:none;width:auto;padding:10px 20px;font-size:11px;">Ver perfil</button>
+</div>
+<svg id="gizmo" width="94" height="94" viewBox="0 0 94 94" style="position:fixed;left:250px;bottom:14px;z-index:18;pointer-events:none;"></svg>
+<div class="hint">Arrastrar: rotar · Rueda: zoom · Click derecho: mover · En modos de medición, clic para marcar</div>
+<div class="loader" id="loader">Cargando terreno…</div>
+
+<script>window.__META__={"verts": 60251, "faces": 119998, "cz": 2847.076216710328, "zmin": 2696.862467407367, "zmax": 2961.2052902456826, "qoff": [-1900.3572079586993, -150.21374930296088, -736.3682835021755], "qspan": [4140.9999995, 264.34282283831544, 1678.0], "idx16": true, "cx": 17956.2575989587, "cy": 71574.83484149782};</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+  var META=window.__META__;
+  var CZ=META.cz, ZMIN=META.zmin, ZMAX=META.zmax;
+  var cv=document.getElementById('cv');
+  var renderer,scene,camera,mesh,geo,posArr,colAttr,raycaster=new THREE.Raycaster();
+  var target=new THREE.Vector3(), sph={r:100,theta:0.7,phi:0.95};
+  var labels=[], measureGroup, contourGroup, thermalMesh, ertMesh, gridGroup, ert3dMesh;
+  var contourLabelCands=[], gridLabelCands=[], clabelPool=[], glabelPool=[], COORDSYS='local', _tmp;
+  var mode='nav';
+  var legLo=ZMIN, legHi=ZMAX, MESH_AB=null;
+
+  // ---------- decodificar malla ----------
+  function decode(ab){
+    var bytes=new Uint8Array(ab);
+    var dv=new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    var nV=dv.getUint32(0,true), nF=dv.getUint32(4,true), idx16=dv.getUint8(8)===1;
+    var off=9, qB=nV*3*2;
+    var q=new Uint16Array(bytes.slice(off, off+qB).buffer); off+=qB;
+    var idx = idx16 ? new Uint16Array(bytes.slice(off, off+nF*3*2).buffer) : new Uint32Array(bytes.slice(off, off+nF*3*4).buffer);
+    var pos=new Float32Array(nV*3);
+    var qo=META.qoff, qs=META.qspan;
+    for(var k=0;k<nV;k++){
+      pos[k*3]  =q[k*3]  /65535*qs[0]+qo[0];
+      pos[k*3+1]=q[k*3+1]/65535*qs[1]+qo[1];
+      pos[k*3+2]=q[k*3+2]/65535*qs[2]+qo[2];
+    }
+    return {pos:pos,idx:idx,nV:nV,nF:nF};
+  }
+
+  // ---------- colormap por elevación ----------
+  var CMAP=[[0.102,0.243,0.227],[0.165,0.561,0.541],[0.275,0.78,0.745],[0.898,0.863,0.788],[0.902,0.565,0.376],[0.776,0.42,0.239]];
+  var CPOS=[0,0.25,0.5,0.7,0.88,1];
+  function cmap(t){
+    t=t<0?0:(t>1?1:t);
+    for(var i=1;i<CPOS.length;i++){ if(t<=CPOS[i]){ var a=CPOS[i-1],b=CPOS[i],f=(t-a)/(b-a);
+      var c0=CMAP[i-1],c1=CMAP[i]; return [c0[0]+(c1[0]-c0[0])*f,c0[1]+(c1[1]-c0[1])*f,c0[2]+(c1[2]-c0[2])*f]; } }
+    return CMAP[5];
+  }
+  function recolor(){
+    var c=colAttr.array, p=posArr;
+    var lo=legLo-CZ, hi=legHi-CZ, rg=(hi-lo)||1;
+    for(var k=0;k<p.length/3;k++){
+      var t=(p[k*3+1]-lo)/rg, col=cmap(t);
+      c[k*3]=col[0];c[k*3+1]=col[1];c[k*3+2]=col[2];
+    }
+    colAttr.needsUpdate=true;
+    document.getElementById('legLo').textContent=Math.round(legLo)+' m';
+    document.getElementById('legHi').textContent=Math.round(legHi)+' m';
+  }
+
+  // ---------- init ----------
+  function init(){
+    var d=decode(MESH_AB); posArr=d.pos;
+    scene=new THREE.Scene(); scene.background=new THREE.Color(0x0A0908);
+    scene.fog=new THREE.FogExp2(0x0A0908,0.00010);
+    geo=new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(posArr,3));
+    geo.setIndex(new THREE.BufferAttribute(d.idx,1));
+    var colors=new Float32Array(d.nV*3);
+    colAttr=new THREE.BufferAttribute(colors,3);
+    geo.setAttribute('color', colAttr);
+    geo.computeVertexNormals();
+    geo.computeBoundingSphere();
+    recolor();
+    var mat=new THREE.MeshLambertMaterial({vertexColors:true, side:THREE.DoubleSide});
+    mesh=new THREE.Mesh(geo,mat); scene.add(mesh);
+
+    scene.add(new THREE.AmbientLight(0xffffff,0.55));
+    scene.add(new THREE.HemisphereLight(0xbfe9e3,0x3a2a1e,0.55));
+    var dl=new THREE.DirectionalLight(0xfff0e0,0.85); dl.position.set(0.6,1,0.4); scene.add(dl);
+
+    measureGroup=new THREE.Group(); scene.add(measureGroup);
+    contourGroup=new THREE.Group(); scene.add(contourGroup);
+    gridGroup=new THREE.Group(); scene.add(gridGroup); _tmp=new THREE.Vector3();
+    for(var _i=0;_i<80;_i++){ var _d=document.createElement('div'); _d.className='clbl'; _d.style.display='none'; document.body.appendChild(_d); clabelPool.push(_d); }
+    for(var _j=0;_j<30;_j++){ var _e=document.createElement('div'); _e.className='glbl'; _e.style.display='none'; document.body.appendChild(_e); glabelPool.push(_e); }
+    geo.computeBoundingBox();
+    thermalMesh=buildThermal(); thermalMesh.visible=false; scene.add(thermalMesh);
+    ertMesh=buildERT(); if(ertMesh){ertMesh.visible=false; scene.add(ertMesh);}
+
+    var bs=geo.boundingSphere; target.copy(bs.center); sph.r=bs.radius*1.7;
+    camera=new THREE.PerspectiveCamera(52, window.innerWidth/window.innerHeight, bs.radius*0.003, bs.radius*40);
+    renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true});
+    resize(); bindUI(); bindControls();
+    document.getElementById('loader').classList.add('hide');
+    loop();
+  }
+
+  function resize(){
+    renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+    renderer.setSize(innerWidth,innerHeight);
+    camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix();
+  }
+  window.addEventListener('resize', function(){ if(renderer) resize(); }, {passive:true});
+
+  function applyCam(){
+    var p=Math.max(0.06,Math.min(Math.PI-0.06,sph.phi));
+    camera.position.set(
+      target.x+sph.r*Math.sin(p)*Math.cos(sph.theta),
+      target.y+sph.r*Math.cos(p),
+      target.z+sph.r*Math.sin(p)*Math.sin(sph.theta));
+    camera.lookAt(target);
+  }
+
+  // ---------- proyección de etiquetas ----------
+  function worldToScreen(v){
+    var p=v.clone().project(camera);
+    return {x:(p.x*0.5+0.5)*innerWidth, y:(-p.y*0.5+0.5)*innerHeight, vis:p.z<1};
+  }
+  function addLabel(text,pos,cls){
+    var el=document.createElement('div'); el.className='lbl'+(cls?' '+cls:''); el.textContent=text;
+    document.body.appendChild(el); labels.push({el:el,pos:pos.clone()}); return el;
+  }
+  function updateLabels(){
+    for(var i=0;i<labels.length;i++){ var s=worldToScreen(labels[i].pos);
+      var e=labels[i].el; if(s.vis){e.style.display='block';e.style.left=s.x+'px';e.style.top=s.y+'px';} else e.style.display='none'; }
+  }
+
+  // ---------- helpers de medición ----------
+  function sphereAt(pos,color){
+    var s=new THREE.Mesh(new THREE.SphereGeometry(geo.boundingSphere.radius*0.006,12,12), new THREE.MeshBasicMaterial({color:color}));
+    s.position.copy(pos); measureGroup.add(s); return s;
+  }
+  function lineBetween(a,b,color){
+    var g=new THREE.BufferGeometry().setFromPoints([a,b]);
+    var l=new THREE.Line(g,new THREE.LineBasicMaterial({color:color})); measureGroup.add(l); return l;
+  }
+  function fmt(n){return Math.round(n).toLocaleString('es-CL');}
+
+  var pending=null, polyPts=[], polyLine=null, profilePts=[], profileLine=null; var PROF_M=240, lastProfile=null;
+  function setResult(html){document.getElementById('result').innerHTML=html;}
+
+  function pick(ev){
+    var r=cv.getBoundingClientRect();
+    var nx=((ev.clientX-r.left)/r.width)*2-1, ny=-((ev.clientY-r.top)/r.height)*2+1;
+    raycaster.setFromCamera({x:nx,y:ny}, camera);
+    var hit=raycaster.intersectObject(mesh,false);
+    return hit.length? hit[0].point : null;
+  }
+
+  function onClick(ev){
+    if(mode==='nav') return;
+    var pt=pick(ev); if(!pt) return;
+    if(mode==='dist'){
+      sphereAt(pt,0x46C7BE);
+      if(!pending){ pending=pt.clone(); setResult('Punto 1 marcado. Marca el punto 2.'); }
+      else{
+        lineBetween(pending,pt,0x46C7BE);
+        var d3=pending.distanceTo(pt);
+        var dh=Math.abs(pt.y-pending.y);
+        var dx=pt.x-pending.x, dz=pt.z-pending.z; var dhz=Math.sqrt(dx*dx+dz*dz);
+        var mid=pending.clone().add(pt).multiplyScalar(0.5);
+        addLabel(fmt(d3)+' m', mid, 'tq');
+        setResult('<span class="hl">Distancia 3D:</span> '+fmt(d3)+' m<br><span class="hl">Horizontal:</span> '+fmt(dhz)+' m<br><span class="hl">Desnivel Δh:</span> '+fmt(dh)+' m');
+        pending=null;
+      }
+    } else if(mode==='height'){
+      sphereAt(pt,0xE89060);
+      var cota=pt.y+CZ;
+      var base=pt.clone(); base.y=geo.boundingSphere.center.y - geo.boundingSphere.radius;
+      lineBetween(pt,new THREE.Vector3(pt.x,base.y,pt.z),0xE89060);
+      addLabel(fmt(cota)+' m', pt, 'cb');
+      setResult('<span class="hl">Cota del punto:</span> '+cota.toFixed(1)+' m');
+    } else if(mode==='poly'){
+      polyPts.push(pt.clone()); sphereAt(pt,0x46C7BE);
+      redrawPoly();
+      var per=polyPerim();
+      document.getElementById('polyHint').style.display='block';
+      document.getElementById('polyHint').textContent=polyPts.length+' vértices · perímetro parcial '+fmt(per)+' m';
+      document.getElementById('closePoly').style.display=polyPts.length>=3?'block':'none';
+    } else if(mode==='profile'){
+      profilePts.push(pt.clone()); sphereAt(pt,0xE89060); redrawProfileLine();
+      document.getElementById('showProfile').style.display=profilePts.length>=2?'block':'none';
+      setResult('Polil\u00ednea: '+profilePts.length+' v\u00e9rtices. Pulsa "Ver perfil".');
+    } else if(mode==='coord'){
+      sphereAt(pt,0x46C7BE); addLabel(coordText(pt),pt,'tq');
+      setResult('<span class="hl">Coordenadas:</span><br>'+coordText(pt));
+    }
+  }
+
+  function redrawPoly(){
+    if(polyLine){ measureGroup.remove(polyLine); }
+    if(polyPts.length<2) return;
+    var g=new THREE.BufferGeometry().setFromPoints(polyPts);
+    polyLine=new THREE.Line(g,new THREE.LineBasicMaterial({color:0x46C7BE})); measureGroup.add(polyLine);
+  }
+  function polyPerim(){ var s=0; for(var i=1;i<polyPts.length;i++) s+=polyPts[i-1].distanceTo(polyPts[i]); return s; }
+
+  function closePolygon(){
+    if(polyPts.length<3) return;
+    var per=polyPerim()+polyPts[polyPts.length-1].distanceTo(polyPts[0]);
+    var A=0; for(var i=0;i<polyPts.length;i++){ var a=polyPts[i],b=polyPts[(i+1)%polyPts.length]; A+=a.x*b.z-b.x*a.z; }
+    A=Math.abs(A)/2;
+    var loop=polyPts.concat([polyPts[0]]);
+    var g=new THREE.BufferGeometry().setFromPoints(loop);
+    measureGroup.add(new THREE.Line(g,new THREE.LineBasicMaterial({color:0x46C7BE})));
+    var cont=polyPts.map(function(p){return new THREE.Vector2(p.x,p.z);});
+    try{
+      var tris=THREE.ShapeUtils.triangulateShape(cont,[]);
+      var yfill=geo.boundingSphere.center.y - geo.boundingSphere.radius*0.5;
+      var fp=[]; for(var t=0;t<tris.length;t++){ for(var j=0;j<3;j++){ var v=cont[tris[t][j]]; fp.push(v.x,yfill,v.y); } }
+      var fg=new THREE.BufferGeometry(); fg.setAttribute('position',new THREE.Float32BufferAttribute(fp,3));
+      var fm=new THREE.MeshBasicMaterial({color:0x2A8F8A,transparent:true,opacity:0.18,side:THREE.DoubleSide});
+      measureGroup.add(new THREE.Mesh(fg,fm));
+    }catch(e){}
+    var cen=polyPts.reduce(function(a,p){return a.add(p);},new THREE.Vector3()).multiplyScalar(1/polyPts.length);
+    addLabel(fmt(A)+' m²', cen, 'tq');
+    setResult('<span class="hl">Área (planta):</span> '+fmt(A)+' m²  ('+(A/10000).toFixed(2)+' ha)<br><span class="hl">Perímetro:</span> '+fmt(per)+' m<br><span class="hl">Vértices:</span> '+polyPts.length);
+    polyPts=[]; if(polyLine){measureGroup.remove(polyLine);polyLine=null;}
+    document.getElementById('closePoly').style.display='none';
+    document.getElementById('polyHint').style.display='none';
+  }
+
+  function clearAll(){
+    while(measureGroup.children.length) measureGroup.remove(measureGroup.children[0]);
+    for(var i=0;i<labels.length;i++) labels[i].el.remove(); labels=[];
+    pending=null; polyPts=[]; polyLine=null; profilePts=[]; profileLine=null;
+    document.getElementById('showProfile').style.display='none';
+    document.getElementById('profPanel').style.display='none';
+    document.getElementById('closePoly').style.display='none';
+    document.getElementById('polyHint').style.display='none';
+    setResult('Elige una herramienta y haz clic sobre el terreno.');
+  }
+
+  // ---------- curvas de nivel ----------
+  function buildContours(interval){
+    while(contourGroup.children.length) contourGroup.remove(contourGroup.children[0]);
+    contourLabelCands=[];
+    if(!document.getElementById('ctOn').checked) return;
+    var ce=document.getElementById('ctColor'), col=ce?parseInt(ce.value.slice(1),16):0x0A0908;
+    var we=document.getElementById('ctW'), grosor=we?parseInt(we.value):1;
+    var oe=document.getElementById('ctOp'), op=oe?parseFloat(oe.value):0.55;
+    var p=posArr, idx=geo.index.array, nF=idx.length/3;
+    var lift=Math.max(0.2,(ZMAX-ZMIN)*0.0015);
+    var seg=[]; var z=function(i){return p[i*3+1]+CZ;};
+    var labelEvery=interval*Math.max(1,Math.ceil(40/interval)), lcount={};
+    for(var f=0; f<nF; f++){
+      var i0=idx[f*3],i1=idx[f*3+1],i2=idx[f*3+2];
+      var z0=z(i0),z1=z(i1),z2=z(i2);
+      var mn=Math.min(z0,z1,z2),mx=Math.max(z0,z1,z2);
+      var L0=Math.ceil(mn/interval)*interval;
+      for(var L=L0; L<=mx; L+=interval){
+        var pts=[]; var E=[[i0,i1,z0,z1],[i1,i2,z1,z2],[i2,i0,z2,z0]];
+        for(var e=0;e<3;e++){ var za=E[e][2],zb=E[e][3];
+          if((za<=L&&zb>L)||(za>L&&zb<=L)){ var tt=(L-za)/(zb-za); var a=E[e][0],b=E[e][1];
+            pts.push(p[a*3]+(p[b*3]-p[a*3])*tt, (p[a*3+1]+(p[b*3+1]-p[a*3+1])*tt)+lift, p[a*3+2]+(p[b*3+2]-p[a*3+2])*tt); } }
+        if(pts.length===6){ seg.push(pts[0],pts[1],pts[2],pts[3],pts[4],pts[5]);
+          if(Math.abs(L/labelEvery-Math.round(L/labelEvery))<1e-6){ var key=Math.round(L); lcount[key]=(lcount[key]||0)+1;
+            if(lcount[key]%7===0) contourLabelCands.push({x:pts[0],y:pts[1],z:pts[2],txt:Math.round(L)}); } }
+      }
+    }
+    if(!seg.length) return;
+    var mat=new THREE.LineBasicMaterial({color:col, transparent:true, opacity:op});
+    for(var w=0;w<grosor;w++){ var sg=seg, off=(w-(grosor-1)/2)*lift*1.1;
+      if(off!==0){ sg=seg.slice(); for(var s=0;s<sg.length;s+=3) sg[s]+=off; }
+      var g=new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(sg,3));
+      contourGroup.add(new THREE.LineSegments(g, mat)); }
+  }
+
+  // ---------- capas geofísicas (simuladas) ----------
+  function jet(u){ u=u<0?0:(u>1?1:u);
+    var s=[[0.17,0.24,0.62],[0.12,0.60,0.87],[0.21,0.83,0.61],[0.96,0.88,0.30],[0.94,0.55,0.18],[0.85,0.23,0.18]];
+    var p=[0,0.2,0.45,0.65,0.83,1];
+    for(var i=1;i<p.length;i++){ if(u<=p[i]){ var f=(u-p[i-1])/(p[i]-p[i-1]); var a=s[i-1],b=s[i];
+      return [a[0]+(b[0]-a[0])*f,a[1]+(b[1]-a[1])*f,a[2]+(b[2]-a[2])*f]; } } return s[5]; }
+
+  function tempAt(x,z,rz){
+    var bb=geo.boundingBox, cx=(bb.min.x+bb.max.x)/2, cz=(bb.min.z+bb.max.z)/2, ex=(bb.max.x-bb.min.x), ez=(bb.max.z-bb.min.z);
+    var T=11+17*((ZMAX-rz)/((ZMAX-ZMIN)||1));
+    T+=9*Math.exp(-(Math.pow((x-(cx+ex*0.10))/(ex*0.07),2)+Math.pow((z-(cz-ez*0.08))/(ez*0.16),2)));
+    T+=6*Math.exp(-(Math.pow((x-(cx-ex*0.24))/(ex*0.05),2)+Math.pow((z-(cz+ez*0.20))/(ez*0.12),2)));
+    return T;
+  }
+  function resfield(x,z,fj){
+    var bb=geo.boundingBox, fix=(x-bb.min.x)/((bb.max.x-bb.min.x)||1), fiz=(z-bb.min.z)/((bb.max.z-bb.min.z)||1);
+    var v=0.42+0.52*fj;
+    v-=0.62*Math.exp(-(Math.pow((fix-0.5)/0.16,2)+Math.pow((fiz-0.5)/0.30,2)+Math.pow((fj-0.10)/0.15,2)));
+    v-=0.30*Math.exp(-(Math.pow((fix-0.76)/0.11,2)+Math.pow((fj-0.4)/0.2,2)));
+    v+=0.16*Math.sin(fix*7.0)*Math.exp(-fj*1.6);
+    return v<0?0:(v>1?1:v);
+  }
+  function buildThermal(){
+    var bb=geo.boundingBox, n=posArr.length/3;
+    var cx=(bb.min.x+bb.max.x)/2, cz=(bb.min.z+bb.max.z)/2, ex=(bb.max.x-bb.min.x), ez=(bb.max.z-bb.min.z);
+    var np=new Float32Array(posArr.length), col=new Float32Array(n*3);
+    var lift=Math.max(0.4,(ZMAX-ZMIN)*0.0022), Tmin=8,Tmax=34;
+    for(var k=0;k<n;k++){
+      var x=posArr[k*3],y=posArr[k*3+1],z=posArr[k*3+2];
+      np[k*3]=x; np[k*3+1]=y+lift; np[k*3+2]=z;
+      var T=tempAt(x,z,y+CZ);
+      var tt=(T-Tmin)/(Tmax-Tmin), c=jet(tt);
+      col[k*3]=c[0];col[k*3+1]=c[1];col[k*3+2]=c[2];
+    }
+    var g=new THREE.BufferGeometry();
+    g.setAttribute('position',new THREE.BufferAttribute(np,3));
+    g.setAttribute('color',new THREE.BufferAttribute(col,3));
+    g.setIndex(geo.index);
+    return new THREE.Mesh(g,new THREE.MeshBasicMaterial({vertexColors:true,side:THREE.DoubleSide,transparent:true,opacity:0.9}));
+  }
+
+  function buildCurtain(axis, fixed, a0, a1, grp){
+    var bb=geo.boundingBox, depth=Math.min(280,(ZMAX-ZMIN)+140);
+    var COLS=64, ROWS=38, rc=new THREE.Raycaster(), above=bb.max.y+(bb.max.y-bb.min.y)+80;
+    var cxA=new Float32Array(COLS), czA=new Float32Array(COLS), topY=new Float32Array(COLS);
+    for(var i=0;i<COLS;i++){ var tt=i/(COLS-1); var x=axis==='x'?a0+(a1-a0)*tt:fixed; var z=axis==='x'?fixed:a0+(a1-a0)*tt;
+      cxA[i]=x; czA[i]=z; rc.set(new THREE.Vector3(x,above,z),new THREE.Vector3(0,-1,0)); var h=rc.intersectObject(mesh,false); topY[i]=h.length?h[0].point.y:(bb.min.y+bb.max.y)/2; }
+    var pos=[],col=[],idx=[];
+    for(var i2=0;i2<COLS;i2++){ var sy=topY[i2];
+      for(var j=0;j<ROWS;j++){ var fj=j/(ROWS-1); pos.push(cxA[i2],sy-depth*fj,czA[i2]); var c=jet(resfield(cxA[i2],czA[i2],fj)); col.push(c[0],c[1],c[2]); } }
+    for(var a=0;a<COLS-1;a++) for(var b=0;b<ROWS-1;b++){ var p0=a*ROWS+b,p1=p0+ROWS,p2=p0+1,p3=p1+1; idx.push(p0,p1,p2,p2,p1,p3); }
+    var g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3)); g.setAttribute('color',new THREE.Float32BufferAttribute(col,3)); g.setIndex(idx);
+    grp.add(new THREE.Mesh(g,new THREE.MeshBasicMaterial({vertexColors:true,side:THREE.DoubleSide})));
+    var lp=[]; for(var k=0;k<COLS;k++) lp.push(new THREE.Vector3(cxA[k],topY[k]+1.0,czA[k]));
+    grp.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(lp), new THREE.LineBasicMaterial({color:0x46C7BE})));
+  }
+  function buildERT(){
+    var bb=geo.boundingBox; if(!bb) return null; var grp=new THREE.Group();
+    var x0=bb.min.x+(bb.max.x-bb.min.x)*0.06, x1=bb.max.x-(bb.max.x-bb.min.x)*0.06;
+    var z0=bb.min.z+(bb.max.z-bb.min.z)*0.06, z1=bb.max.z-(bb.max.z-bb.min.z)*0.06;
+    for(var i=0;i<4;i++){ var zf=bb.min.z+(bb.max.z-bb.min.z)*(0.18+0.21*i); buildCurtain('x', zf, x0, x1, grp); }
+    for(var j=0;j<4;j++){ var xf=bb.min.x+(bb.max.x-bb.min.x)*(0.2+0.2*j); buildCurtain('z', xf, z0, z1, grp); }
+    return grp;
+  }
+
+  // ---------- perfil / polilínea ----------
+  function redrawProfileLine(){
+    if(profileLine) measureGroup.remove(profileLine);
+    if(profilePts.length<2) return;
+    profileLine=new THREE.Line(new THREE.BufferGeometry().setFromPoints(profilePts), new THREE.LineBasicMaterial({color:0xE89060}));
+    measureGroup.add(profileLine);
+  }
+  function profLen(pp){var s=0;for(var i=1;i<pp.length;i++)s+=Math.hypot(pp[i].x-pp[i-1].x,pp[i].z-pp[i-1].z);return s;}
+  function sampleSurfaceY(x,z){ var bb=geo.boundingBox, rc=new THREE.Raycaster(), above=bb.max.y+(bb.max.y-bb.min.y)+80;
+    rc.set(new THREE.Vector3(x,above,z),new THREE.Vector3(0,-1,0)); var h=rc.intersectObject(mesh,false); return h.length?h[0].point.y:null; }
+  function generateProfile(){
+    if(profilePts.length<2) return;
+    var total=profLen(profilePts), segLen=[],cum=[0];
+    for(var i=1;i<profilePts.length;i++){var d=Math.hypot(profilePts[i].x-profilePts[i-1].x,profilePts[i].z-profilePts[i-1].z);segLen.push(d);cum.push(cum[i-1]+d);}
+    var sx=[],sz=[],dist=[],elev=[],temp=[];
+    for(var s=0;s<PROF_M;s++){ var dd=total*s/(PROF_M-1), si=0;
+      while(si<segLen.length-1 && dd>cum[si+1]) si++;
+      var f=segLen[si]?(dd-cum[si])/segLen[si]:0;
+      var x=profilePts[si].x+(profilePts[si+1].x-profilePts[si].x)*f, z=profilePts[si].z+(profilePts[si+1].z-profilePts[si].z)*f;
+      var y=sampleSurfaceY(x,z), rz=(y!==null?y:0)+CZ;
+      sx.push(x);sz.push(z);dist.push(dd);elev.push(rz);temp.push(tempAt(x,z,rz));
+    }
+    lastProfile={dist:dist,sx:sx,sz:sz,elev:elev,temp:temp,total:total};
+    renderProfile(dist,sx,sz,elev,temp,total);
+  }
+  function refreshProfile(){ if(lastProfile && document.getElementById('profPanel').style.display==='block') renderProfile(lastProfile.dist,lastProfile.sx,lastProfile.sz,lastProfile.elev,lastProfile.temp,lastProfile.total); }
+  function renderProfile(dist,sx,sz,elev,temp,total){
+    var thOn=document.getElementById('thOn').checked, ertOn=document.getElementById('ertOn').checked||document.getElementById('ert3dOn').checked;
+    var cv2=document.getElementById('profCv'), g=cv2.getContext('2d'), W=cv2.width, H=cv2.height;
+    g.clearRect(0,0,W,H); g.fillStyle='#0d0c0b'; g.fillRect(0,0,W,H);
+    var mL=54,mR=14,mT=12,mB=24, pw=W-mL-mR, ph=H-mT-mB;
+    var emin=Math.min.apply(null,elev), emax=Math.max.apply(null,elev);
+    var depth=ertOn?Math.min(280,(ZMAX-ZMIN)+140):0;
+    var pad=(emax-emin)*0.12+2, yTop=emax+pad, yBot=ertOn?(emin-depth):(emin-pad);
+    function X(d){return mL+pw*d/(total||1);}
+    function Y(c){return mT+ph*(yTop-c)/((yTop-yBot)||1);}
+    if(ertOn){ var COLS=300, ROWS=84;
+      for(var ci=0;ci<COLS;ci++){ var idxf=(PROF_M-1)*ci/(COLS-1), ia=Math.min(Math.floor(idxf),PROF_M-2), fb=idxf-ia;
+        var X0=sx[ia]+(sx[ia+1]-sx[ia])*fb, Z0=sz[ia]+(sz[ia+1]-sz[ia])*fb, E0=elev[ia]+(elev[ia+1]-elev[ia])*fb;
+        var px=mL+pw*ci/COLS, pwc=pw/COLS+1;
+        for(var rj=0;rj<ROWS;rj++){ var fj=rj/ROWS, fj2=(rj+1)/ROWS, c=jet(resfield(X0,Z0,fj));
+          g.fillStyle='rgb('+(c[0]*255|0)+','+(c[1]*255|0)+','+(c[2]*255|0)+')';
+          var y0=Y(E0-depth*fj), y1=Y(E0-depth*fj2); g.fillRect(px,y0,pwc,(y1-y0)+1); } } }
+    g.lineWidth=2;
+    if(thOn){ for(var s=1;s<dist.length;s++){ var tt=(temp[s]-8)/26, c=jet(tt<0?0:(tt>1?1:tt));
+        g.strokeStyle='rgb('+(c[0]*255|0)+','+(c[1]*255|0)+','+(c[2]*255|0)+')'; g.beginPath();
+        g.moveTo(X(dist[s-1]),Y(elev[s-1])); g.lineTo(X(dist[s]),Y(elev[s])); g.stroke(); } }
+    else { g.strokeStyle=ertOn?'#0A0908':'#46C7BE'; g.beginPath();
+      for(var s=0;s<dist.length;s++){ var x=X(dist[s]),y=Y(elev[s]); if(s===0)g.moveTo(x,y); else g.lineTo(x,y);} g.stroke(); }
+    g.fillStyle='rgba(229,220,201,0.55)'; g.font='9px monospace'; g.lineWidth=1;
+    for(var i=0;i<=4;i++){ var c=yBot+(yTop-yBot)*i/4, y=Y(c); g.strokeStyle='rgba(229,220,201,0.09)'; g.beginPath(); g.moveTo(mL,y); g.lineTo(W-mR,y); g.stroke(); g.fillText(Math.round(c), 4, y+3); }
+    for(var i=0;i<=4;i++){ var d=total*i/4; g.fillText(Math.round(d)+'m', X(d)-9, H-7); }
+    document.getElementById('profTitle').textContent='Perfil · '+Math.round(total)+' m · cota (m)'+(ertOn?' · ERT/IP':'')+(thOn?' · térmico':'');
+    document.getElementById('profPanel').style.display='block';
+  }
+
+  // ---------- coordenadas / grilla / orientación ----------
+  function projXYZ(x,y,z){ _tmp.set(x,y,z).project(camera); return {x:(_tmp.x*0.5+0.5)*innerWidth, y:(-_tmp.y*0.5+0.5)*innerHeight, vis:_tmp.z<1}; }
+  function localFromThree(p){ return { E:p.x+META.cx, N:META.cy-p.z, Z:p.y+CZ }; }
+  function utmToLatLon(e,n,zone,south){
+    var a=6378137.0,f=1/298.257223563,k0=0.9996,e2=f*(2-f),ep2=e2/(1-e2);
+    var x=e-500000, y=south?n-10000000:n, M=y/k0, mu=M/(a*(1-e2/4-3*e2*e2/64-5*e2*e2*e2/256));
+    var e1=(1-Math.sqrt(1-e2))/(1+Math.sqrt(1-e2));
+    var phi1=mu+(3*e1/2-27*e1*e1*e1/32)*Math.sin(2*mu)+(21*e1*e1/16-55*e1*e1*e1*e1/32)*Math.sin(4*mu)+(151*e1*e1*e1/96)*Math.sin(6*mu);
+    var s=Math.sin(phi1), N1=a/Math.sqrt(1-e2*s*s), T1=Math.tan(phi1)*Math.tan(phi1), C1=ep2*Math.cos(phi1)*Math.cos(phi1);
+    var R1=a*(1-e2)/Math.pow(1-e2*s*s,1.5), D=x/(N1*k0);
+    var lat=phi1-(N1*Math.tan(phi1)/R1)*(D*D/2-(5+3*T1+10*C1-4*C1*C1-9*ep2)*D*D*D*D/24+(61+90*T1+298*C1+45*T1*T1-252*ep2-3*C1*C1)*D*D*D*D*D*D/720);
+    var lon=(D-(1+2*T1+C1)*D*D*D/6+(5-2*C1+28*T1-3*C1*C1+8*ep2+24*T1*T1)*D*D*D*D*D/120)/Math.cos(phi1);
+    return { lat:lat*180/Math.PI, lon:(zone*6-183)+lon*180/Math.PI };
+  }
+  function coordText(p){
+    var L=localFromThree(p);
+    if(COORDSYS==='local') return 'E '+L.E.toFixed(1)+'  N '+L.N.toFixed(1)+'  Z '+L.Z.toFixed(1)+' m';
+    var ue=(L.E-META.cx)+400000, un=(L.N-META.cy)+7400000;
+    if(COORDSYS==='utm') return 'UTM 19S  E '+Math.round(ue)+'  N '+Math.round(un)+'  Z '+Math.round(L.Z)+' m';
+    var g=utmToLatLon(ue,un,19,true); return 'Lat '+g.lat.toFixed(5)+'°  Lon '+g.lon.toFixed(5)+'°  Z '+Math.round(L.Z)+' m';
+  }
+  function buildGrid(){
+    while(gridGroup.children.length) gridGroup.remove(gridGroup.children[0]); gridLabelCands=[];
+    if(!document.getElementById('gridOn').checked) return;
+    var bb=geo.boundingBox, yb=bb.min.y-(ZMAX-ZMIN)*0.04, step=500, seg=[];
+    var E0=bb.min.x+META.cx, E1=bb.max.x+META.cx, N0=META.cy-bb.max.z, N1=META.cy-bb.min.z;
+    for(var E=Math.ceil(E0/step)*step;E<=E1;E+=step){ var tx=E-META.cx; seg.push(tx,yb,bb.min.z,tx,yb,bb.max.z); gridLabelCands.push({x:tx,y:yb,z:bb.max.z,axis:'E',val:E}); }
+    for(var N=Math.ceil(N0/step)*step;N<=N1;N+=step){ var tz=META.cy-N; seg.push(bb.min.x,yb,tz,bb.max.x,yb,tz); gridLabelCands.push({x:bb.min.x,y:yb,z:tz,axis:'N',val:N}); }
+    if(seg.length){ var g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.Float32BufferAttribute(seg,3));
+      gridGroup.add(new THREE.LineSegments(g,new THREE.LineBasicMaterial({color:0x46C7BE,transparent:true,opacity:0.24}))); }
+  }
+  function buildERT3D(){
+    if(ert3dMesh){ scene.remove(ert3dMesh); if(ert3dMesh.geometry)ert3dMesh.geometry.dispose(); ert3dMesh=null; }
+    if(!document.getElementById('ert3dOn').checked) return;
+    var bb=geo.boundingBox, depth=Math.min(280,(ZMAX-ZMIN)+140);
+    var x0=bb.min.x,x1=bb.max.x,z0=bb.min.z,z1=bb.max.z;
+    var NX=40,NZ=28,ND=24, rc=new THREE.Raycaster(), above=bb.max.y+(bb.max.y-bb.min.y)+80;
+    var SG=new Float32Array(NX*NZ);
+    for(var ix=0;ix<NX;ix++){ var x=x0+(x1-x0)*ix/(NX-1);
+      for(var iz=0;iz<NZ;iz++){ var z=z0+(z1-z0)*iz/(NZ-1);
+        rc.set(new THREE.Vector3(x,above,z),new THREE.Vector3(0,-1,0)); var h=rc.intersectObject(mesh,false); SG[ix*NZ+iz]=h.length?h[0].point.y:(bb.min.y+bb.max.y)/2; } }
+    function syAt(fu,fv){ var a=fu*(NX-1),b=fv*(NZ-1),ia=Math.min(NX-2,Math.floor(a)),ib=Math.min(NZ-2,Math.floor(b)),fa=a-ia,fb=b-ib;
+      return SG[ia*NZ+ib]*(1-fa)*(1-fb)+SG[(ia+1)*NZ+ib]*fa*(1-fb)+SG[ia*NZ+ib+1]*(1-fa)*fb+SG[(ia+1)*NZ+ib+1]*fa*fb; }
+    var pos=[],col=[],idx=[];
+    function addGrid(fn,nu,nv){ var start=pos.length/3;
+      for(var u=0;u<nu;u++) for(var v=0;v<nv;v++){ var P=fn(u/(nu-1),v/(nv-1)); pos.push(P[0],P[1],P[2]); var c=jet(P[3]); col.push(c[0],c[1],c[2]); }
+      for(var u2=0;u2<nu-1;u2++) for(var v2=0;v2<nv-1;v2++){ var a=start+u2*nv+v2,b=a+nv,c2=a+1,d=b+1; idx.push(a,b,c2,c2,b,d); } }
+    addGrid(function(fu,fv){ var x=x0+(x1-x0)*fu,z=z0+(z1-z0)*fv; return [x,syAt(fu,fv),z,resfield(x,z,0)]; },NX,NZ);
+    addGrid(function(fu,fv){ var x=x0+(x1-x0)*fu,z=z0+(z1-z0)*fv; return [x,syAt(fu,fv)-depth,z,resfield(x,z,1)]; },NX,NZ);
+    addGrid(function(fu,fv){ var x=x0+(x1-x0)*fu,z=z0; return [x,syAt(fu,0)-depth*fv,z,resfield(x,z,fv)]; },NX,ND);
+    addGrid(function(fu,fv){ var x=x0+(x1-x0)*fu,z=z1; return [x,syAt(fu,1)-depth*fv,z,resfield(x,z,fv)]; },NX,ND);
+    addGrid(function(fu,fv){ var z=z0+(z1-z0)*fu,x=x0; return [x,syAt(0,fu)-depth*fv,z,resfield(x,z,fv)]; },NZ,ND);
+    addGrid(function(fu,fv){ var z=z0+(z1-z0)*fu,x=x1; return [x,syAt(1,fu)-depth*fv,z,resfield(x,z,fv)]; },NZ,ND);
+    var g=new THREE.BufferGeometry();
+    g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+    g.setAttribute('color',new THREE.Float32BufferAttribute(col,3));
+    g.setIndex(idx); g.computeVertexNormals();
+    var op=document.getElementById('ert3dOp'), opv=op?parseFloat(op.value):1;
+    var mat=new THREE.MeshLambertMaterial({vertexColors:true, side:THREE.DoubleSide, transparent:opv<1, opacity:opv, depthWrite:opv>=1});
+    ert3dMesh=new THREE.Mesh(g,mat); scene.add(ert3dMesh);
+  }
+  function updateContourLabels(){
+    var shown=[],pi=0;
+    for(var i=0;i<contourLabelCands.length && pi<clabelPool.length;i++){ var c=contourLabelCands[i],s=projXYZ(c.x,c.y,c.z); if(!s.vis) continue;
+      var ok=true; for(var j=0;j<shown.length;j++){ if(Math.abs(shown[j][0]-s.x)<56 && Math.abs(shown[j][1]-s.y)<32){ok=false;break;} } if(!ok) continue;
+      shown.push([s.x,s.y]); var el=clabelPool[pi++]; el.style.display='block'; el.style.left=s.x+'px'; el.style.top=s.y+'px'; el.textContent=c.txt; }
+    for(var k=pi;k<clabelPool.length;k++) clabelPool[k].style.display='none';
+  }
+  function updateGridLabels(){
+    var pi=0;
+    for(var i=0;i<gridLabelCands.length && pi<glabelPool.length;i++){ var c=gridLabelCands[i],s=projXYZ(c.x,c.y,c.z); if(!s.vis) continue;
+      var el=glabelPool[pi++]; el.style.display='block'; el.style.left=s.x+'px'; el.style.top=s.y+'px'; el.textContent=(c.axis==='E'?'E ':'N ')+c.val; }
+    for(var k=pi;k<glabelPool.length;k++) glabelPool[k].style.display='none';
+  }
+  function updateGizmo(){
+    var sv=document.getElementById('gizmo'); if(!sv||!geo.boundingSphere) return;
+    var o=projXYZ(target.x,target.y,target.z), k=geo.boundingSphere.radius*0.14, cxp=47,cyp=47,R=30;
+    var ax=[{v:[0,0,-1],c:'#46C7BE',t:'N'},{v:[0,0,1],c:'#7d7a70',t:'S'},{v:[1,0,0],c:'#E89060',t:'E'},{v:[-1,0,0],c:'#7d7a70',t:'O'},{v:[0,1,0],c:'#E5DCC9',t:'Z'}];
+    var html='';
+    for(var i=0;i<ax.length;i++){ var p2=projXYZ(target.x+ax[i].v[0]*k,target.y+ax[i].v[1]*k,target.z+ax[i].v[2]*k);
+      var dx=p2.x-o.x,dy=p2.y-o.y,len=Math.hypot(dx,dy)||1; dx/=len; dy/=len;
+      html+='<line x1="'+cxp+'" y1="'+cyp+'" x2="'+(cxp+dx*R)+'" y2="'+(cyp+dy*R)+'" stroke="'+ax[i].c+'" stroke-width="2"/>';
+      html+='<text x="'+(cxp+dx*(R+7))+'" y="'+(cyp+dy*(R+7)+3)+'" fill="'+ax[i].c+'" font-size="10" font-family="monospace" text-anchor="middle">'+ax[i].t+'</text>'; }
+    sv.innerHTML=html;
+  }
+
+  // ---------- UI ----------
+  function bindUI(){
+    var zlo=document.getElementById('zlo'), zhi=document.getElementById('zhi');
+    zlo.value=Math.round(ZMIN); zhi.value=Math.round(ZMAX);
+    recolor();
+    function applyLeg(){ legLo=parseFloat(zlo.value); legHi=parseFloat(zhi.value); if(legHi<=legLo) legHi=legLo+1; recolor(); }
+    zlo.addEventListener('input',applyLeg); zhi.addEventListener('input',applyLeg);
+    document.getElementById('zauto').addEventListener('click',function(){ zlo.value=Math.round(ZMIN); zhi.value=Math.round(ZMAX); applyLeg(); });
+    document.getElementById('ctOn').addEventListener('change',function(){ buildContours(parseFloat(document.getElementById('ctIv').value)); });
+    document.getElementById('ctIv').addEventListener('change',function(){ if(document.getElementById('ctOn').checked) buildContours(parseFloat(this.value)); });
+    ['ctColor','ctW','ctOp'].forEach(function(id){ var el=document.getElementById(id); if(el) el.addEventListener('input',function(){ if(document.getElementById('ctOn').checked) buildContours(parseFloat(document.getElementById('ctIv').value)); }); });
+    document.getElementById('gridOn').addEventListener('change',buildGrid);
+    document.getElementById('ert3dOn').addEventListener('change',function(){ buildERT3D(); refreshProfile(); });
+    document.getElementById('ert3dOp').addEventListener('input',function(){ if(ert3dMesh){ var o=parseFloat(this.value); ert3dMesh.material.opacity=o; ert3dMesh.material.transparent=o<1; ert3dMesh.material.depthWrite=o>=1; ert3dMesh.material.needsUpdate=true; } });
+    document.getElementById('coordSys').addEventListener('change',function(){ COORDSYS=this.value; });
+    document.getElementById('closePoly').addEventListener('click',closePolygon);
+    document.getElementById('showProfile').addEventListener('click',generateProfile);
+    document.getElementById('profClose').addEventListener('click',function(){document.getElementById('profPanel').style.display='none';});
+    document.getElementById('srfOn').addEventListener('change',function(){ if(mesh) mesh.visible=this.checked; });
+    document.getElementById('thOn').addEventListener('change',function(){ if(thermalMesh) thermalMesh.visible=this.checked; refreshProfile(); });
+    document.getElementById('ertOn').addEventListener('change',function(){ if(ertMesh) ertMesh.visible=this.checked; refreshProfile(); });
+    var tools=document.querySelectorAll('.tool');
+    tools.forEach(function(t){ t.addEventListener('click',function(){
+      var md=t.getAttribute('data-mode');
+      if(md==='clear'){ clearAll(); return; }
+      mode=md; tools.forEach(function(x){x.classList.remove('on');}); t.classList.add('on');
+      document.getElementById('showProfile').style.display='none';
+      if(md==='coord') setResult('Haz clic en un punto para ver sus coordenadas.');
+      else if(md==='profile') setResult('Dibuja la polilínea con clics. Luego "Ver perfil".');
+      else if(md==='poly') setResult('Haz clic para añadir vértices. Luego "Cerrar polígono".');
+      else if(md==='dist') setResult('Marca el punto 1 y el punto 2.');
+      else if(md==='height') setResult('Haz clic en un punto para ver su cota.');
+      else setResult('Modo navegación: arrastra para rotar.');
+    }); });
+  }
+
+  // ---------- controles de cámara ----------
+  function bindControls(){
+    var down=false,moved=false,btn=0,sx=0,sy=0,lx=0,ly=0;
+    cv.addEventListener('contextmenu',function(e){e.preventDefault();});
+    cv.addEventListener('pointerdown',function(e){down=true;moved=false;btn=e.button;sx=lx=e.clientX;sy=ly=e.clientY;cv.setPointerCapture(e.pointerId);});
+    cv.addEventListener('pointermove',function(e){
+      if(!down) return;
+      if(Math.abs(e.clientX-sx)+Math.abs(e.clientY-sy)>4) moved=true;
+      var dx=e.clientX-lx,dy=e.clientY-ly; lx=e.clientX; ly=e.clientY;
+      if(btn===2||e.shiftKey){
+        var panS=sph.r*0.0013, dir=new THREE.Vector3(); camera.getWorldDirection(dir);
+        var right=new THREE.Vector3().crossVectors(dir,new THREE.Vector3(0,1,0)).normalize();
+        var up=new THREE.Vector3().crossVectors(right,dir).normalize();
+        target.addScaledVector(right,-dx*panS); target.addScaledVector(up,dy*panS);
+      } else { sph.theta-=dx*0.005; sph.phi-=dy*0.005; }
+    });
+    cv.addEventListener('pointerup',function(e){ down=false; if(!moved) onClick(e); });
+    cv.addEventListener('pointermove',function(e){ if(down) return; var pt=pick(e); var ro=document.getElementById('coordReadout'); if(ro) ro.textContent=pt?coordText(pt):''; });
+    cv.addEventListener('wheel',function(e){ e.preventDefault(); sph.r*=(1+Math.sign(e.deltaY)*0.08); sph.r=Math.max(geo.boundingSphere.radius*0.05,Math.min(geo.boundingSphere.radius*22,sph.r)); },{passive:false});
+  }
+
+  function loop(){ requestAnimationFrame(loop); applyCam(); renderer.render(scene,camera); updateLabels(); updateContourLabels(); updateGridLabels(); updateGizmo(); }
+
+  fetch('assets/topo_rajo_mesh.bin').then(function(r){return r.arrayBuffer();}).then(function(ab){ MESH_AB=ab; init(); })
+    .catch(function(e){ document.getElementById('loader').textContent='Error al cargar la malla'; console.error(e); });
+})();
+</script>
+</body>
+</html>
