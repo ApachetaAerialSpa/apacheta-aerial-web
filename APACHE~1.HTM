@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="robots" content="noindex, nofollow"/>
+<title>Acceso clientes · Apacheta Aerial</title>
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@200;300;400;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root{--void:#0A0908;--turquesa:#2A8F8A;--turquesa-bright:#46C7BE;--cobre:#C66B3D;--cobre-bright:#E89060;--beige:#E5DCC9;--beige-dim:rgba(229,220,201,.55);--beige-faint:rgba(229,220,201,.34);--hair:rgba(229,220,201,.14);}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;}
+  body{background:radial-gradient(120% 90% at 50% 0%, #14110d 0%, #0A0908 70%);color:var(--beige);font-family:"Sora",system-ui,sans-serif;font-weight:300;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+  .card{width:100%;max-width:380px;background:rgba(13,12,11,.7);backdrop-filter:blur(10px);border:1px solid var(--hair);border-radius:18px;padding:34px 30px;}
+  .brand{display:flex;align-items:center;gap:11px;margin-bottom:26px;}
+  .brand img{width:34px;height:34px;}
+  .brand .bt{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--beige);font-weight:500;line-height:1.3;}
+  .brand .bt span{display:block;color:var(--beige-faint);font-size:8.5px;letter-spacing:.2em;}
+  h1{font-family:"Sora";font-weight:200;font-size:25px;letter-spacing:-.01em;margin-bottom:6px;}
+  h1 b{font-weight:600;color:var(--turquesa-bright);}
+  .sub{font-family:"JetBrains Mono",monospace;font-size:10.5px;color:var(--beige-dim);letter-spacing:.04em;margin-bottom:24px;line-height:1.6;}
+  label{display:block;font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--beige-dim);margin:14px 0 6px;}
+  input{width:100%;background:rgba(10,9,8,.6);border:1px solid var(--hair);color:var(--beige);border-radius:10px;padding:12px 13px;font-family:"Sora";font-size:14px;transition:border-color .18s;}
+  input:focus{outline:none;border-color:var(--turquesa);}
+  .btn{width:100%;margin-top:22px;background:var(--turquesa);color:var(--void);border:none;border-radius:10px;padding:13px;font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:500;cursor:pointer;transition:all .18s;}
+  .btn:hover{background:var(--turquesa-bright);}
+  .btn:disabled{opacity:.55;cursor:wait;}
+  .msg{margin-top:16px;font-family:"JetBrains Mono",monospace;font-size:10.5px;line-height:1.55;min-height:16px;text-align:center;}
+  .msg.err{color:var(--cobre-bright);}
+  .msg.ok{color:var(--turquesa-bright);}
+  .back{display:block;text-align:center;margin-top:22px;font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--beige-faint);text-decoration:none;}
+  .back:hover{color:var(--turquesa-bright);}
+  .foot{text-align:center;margin-top:20px;font-family:"JetBrains Mono",monospace;font-size:8.5px;color:var(--beige-faint);letter-spacing:.06em;line-height:1.6;}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="brand">
+    <img src="assets/favicon.svg" alt=""/>
+    <div class="bt">Apacheta Aerial<span>Portal de clientes</span></div>
+  </div>
+  <h1>Acceso <b>clientes</b></h1>
+  <div class="sub">Ingresa con las credenciales que te entregamos para ver tus proyectos y entregables.</div>
+
+  <form id="loginForm" autocomplete="on">
+    <label for="email">Correo</label>
+    <input type="email" id="email" name="email" required placeholder="tu@empresa.cl" autocomplete="username"/>
+    <label for="password">Contraseña</label>
+    <input type="password" id="password" name="password" required placeholder="••••••••" autocomplete="current-password"/>
+    <button class="btn" id="btn" type="submit">Ingresar</button>
+  </form>
+  <div class="msg" id="msg"></div>
+  <a class="back" href="index.html">← Volver al sitio</a>
+  <div class="foot">¿Sin acceso? Escríbenos a contacto@apachetaaerial.com</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+  "use strict";
+  var SUPABASE_URL='https://fxxiaaxsentryxzxsqpb.supabase.co';
+  var SUPABASE_KEY='sb_publishable_7SgM3tr4KAKt-3B22wA4mw_fWIhMneX';
+  var sb=window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  var msg=document.getElementById('msg'), btn=document.getElementById('btn');
+
+  // Si ya hay sesión activa, ir directo al panel
+  sb.auth.getSession().then(function(res){
+    if(res.data && res.data.session){ location.replace('apacheta-portal-inicio.html'); }
+  });
+
+  function show(t,cls){ msg.textContent=t; msg.className='msg '+(cls||''); }
+
+  document.getElementById('loginForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var email=document.getElementById('email').value.trim();
+    var password=document.getElementById('password').value;
+    if(!email||!password){ show('Completa correo y contraseña.','err'); return; }
+    btn.disabled=true; show('Verificando…');
+    sb.auth.signInWithPassword({email:email, password:password}).then(function(res){
+      if(res.error){
+        btn.disabled=false;
+        var m=res.error.message||'';
+        if(/Invalid login/i.test(m)) show('Correo o contraseña incorrectos.','err');
+        else if(/Email not confirmed/i.test(m)) show('Tu cuenta aún no está activada. Contáctanos.','err');
+        else show('No se pudo iniciar sesión. Intenta de nuevo.','err');
+        return;
+      }
+      show('¡Bienvenido! Cargando tu panel…','ok');
+      location.replace('apacheta-portal-inicio.html');
+    }).catch(function(){ btn.disabled=false; show('Error de conexión. Revisa tu internet.','err'); });
+  });
+})();
+</script>
+</body>
+</html>

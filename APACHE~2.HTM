@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="robots" content="noindex, nofollow"/>
+<title>Panel del cliente · Apacheta Aerial</title>
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@200;300;400;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root{--void:#0A0908;--turquesa:#2A8F8A;--turquesa-bright:#46C7BE;--cobre:#C66B3D;--cobre-bright:#E89060;--beige:#E5DCC9;--beige-dim:rgba(229,220,201,.55);--beige-faint:rgba(229,220,201,.34);--hair:rgba(229,220,201,.14);}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:radial-gradient(130% 100% at 50% 0%, #14110d 0%, #0A0908 60%);color:var(--beige);font-family:"Sora",system-ui,sans-serif;font-weight:300;min-height:100vh;}
+  .bar{position:sticky;top:0;z-index:20;display:flex;justify-content:space-between;align-items:center;gap:14px;padding:14px clamp(16px,4vw,40px);background:rgba(10,9,8,.82);backdrop-filter:blur(10px);border-bottom:1px solid var(--hair);}
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand img{width:30px;height:30px;}
+  .brand .bt{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--beige);font-weight:500;}
+  .bar-right{display:flex;align-items:center;gap:14px;}
+  .who{font-family:"JetBrains Mono",monospace;font-size:10px;color:var(--beige-dim);}
+  .logout{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--beige-dim);background:none;border:1px solid var(--hair);border-radius:999px;padding:7px 13px;cursor:pointer;transition:all .18s;}
+  .logout:hover{color:var(--cobre-bright);border-color:var(--cobre);}
+  .wrap{max-width:1000px;margin:0 auto;padding:clamp(22px,5vw,46px) clamp(16px,4vw,40px);}
+  .hi{font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--turquesa-bright);margin-bottom:8px;}
+  h1{font-weight:200;font-size:clamp(26px,4.5vw,38px);letter-spacing:-.01em;margin-bottom:6px;}
+  h1 b{font-weight:600;}
+  .lead{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--beige-dim);line-height:1.7;margin-bottom:30px;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;}
+  .card{background:rgba(13,12,11,.62);border:1px solid var(--hair);border-radius:15px;padding:19px 20px;display:flex;flex-direction:column;}
+  .ct{font-weight:400;font-size:18px;margin-bottom:3px;}
+  .cl{font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.06em;color:var(--beige-faint);text-transform:uppercase;margin-bottom:12px;}
+  .badge{align-self:flex-start;font-family:"JetBrains Mono",monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:4px 9px;border-radius:999px;margin-bottom:13px;border:1px solid;}
+  .badge.planificacion{color:var(--beige-dim);border-color:var(--hair);}
+  .badge.vuelo{color:var(--turquesa-bright);border-color:rgba(70,199,190,.4);}
+  .badge.procesamiento{color:var(--cobre-bright);border-color:rgba(232,144,96,.4);}
+  .badge.entregado{color:#7BE3A0;border-color:rgba(123,227,160,.4);background:rgba(123,227,160,.08);}
+  .desc{font-size:13px;color:var(--beige-dim);line-height:1.6;margin-bottom:15px;flex:1;}
+  .acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:auto;}
+  .a{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.04em;text-decoration:none;padding:8px 12px;border-radius:8px;transition:all .18s;border:1px solid;}
+  .a.viewer{color:var(--void);background:var(--turquesa);border-color:var(--turquesa);}
+  .a.viewer:hover{background:var(--turquesa-bright);border-color:var(--turquesa-bright);}
+  .a.download{color:var(--beige);background:rgba(198,107,61,.14);border-color:var(--cobre);}
+  .a.download:hover{background:rgba(198,107,61,.3);color:#fff;}
+  .state{text-align:center;padding:60px 20px;font-family:"JetBrains Mono",monospace;color:var(--beige-faint);font-size:12px;line-height:1.8;}
+  .state .big{font-size:13px;color:var(--beige-dim);margin-bottom:8px;}
+  .spin{display:inline-block;width:16px;height:16px;border:2px solid var(--hair);border-top-color:var(--turquesa-bright);border-radius:50%;animation:sp .8s linear infinite;vertical-align:middle;margin-right:8px;}
+  @keyframes sp{to{transform:rotate(360deg);}}
+</style>
+</head>
+<body>
+<div class="bar">
+  <div class="brand"><img src="assets/favicon.svg" alt=""/><span class="bt">Apacheta Aerial · Portal</span></div>
+  <div class="bar-right">
+    <span class="who" id="who"></span>
+    <button class="logout" id="logout">Cerrar sesión</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="hi">Portal de clientes</div>
+  <h1>Tus <b>proyectos</b></h1>
+  <div class="lead">Aquí encuentras tus levantamientos: visores en línea, estado y entregables para descarga.</div>
+  <div id="content"><div class="state"><span class="spin"></span>Cargando tus proyectos…</div></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+  "use strict";
+  var SUPABASE_URL='https://fxxiaaxsentryxzxsqpb.supabase.co';
+  var SUPABASE_KEY='sb_publishable_7SgM3tr4KAKt-3B22wA4mw_fWIhMneX';
+  var sb=window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  var content=document.getElementById('content');
+
+  var STATUS={
+    planificacion:{l:'Planificación'}, vuelo:{l:'Vuelo en terreno'},
+    procesamiento:{l:'Procesamiento'}, entregado:{l:'Entregado'}
+  };
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+
+  document.getElementById('logout').addEventListener('click', function(){
+    sb.auth.signOut().then(function(){ location.replace('apacheta-portal-acceso.html'); });
+  });
+
+  sb.auth.getSession().then(function(res){
+    var session = res.data && res.data.session;
+    if(!session){ location.replace('apacheta-portal-acceso.html'); return; }
+    document.getElementById('who').textContent = session.user.email;
+    loadProjects();
+  });
+
+  function loadProjects(){
+    sb.from('projects')
+      .select('id,name,location,status,description,project_assets(kind,label,url,sort)')
+      .order('created_at',{ascending:false})
+      .then(function(res){
+        if(res.error){ content.innerHTML='<div class="state"><div class="big">No pudimos cargar tus proyectos.</div>Intenta recargar la página en un momento.</div>'; return; }
+        var rows=res.data||[];
+        if(!rows.length){ content.innerHTML='<div class="state"><div class="big">Aún no tienes proyectos publicados.</div>Cuando completemos tu levantamiento aparecerá aquí. ¿Dudas? contacto@apachetaaerial.com</div>'; return; }
+        var html='<div class="grid">';
+        rows.forEach(function(p){
+          var st=STATUS[p.status]||{l:p.status||'—'};
+          var assets=(p.project_assets||[]).slice().sort(function(a,b){return (a.sort||0)-(b.sort||0);});
+          var acts=assets.map(function(a){
+            var cls=a.kind==='viewer'?'viewer':'download';
+            var icon=a.kind==='viewer'?'▶ ':'↓ ';
+            var ext = /^https?:/i.test(a.url)?' target="_blank" rel="noopener"':'';
+            return '<a class="a '+cls+'" href="'+esc(a.url)+'"'+ext+'>'+icon+esc(a.label)+'</a>';
+          }).join('');
+          html+='<div class="card">'+
+            '<div class="ct">'+esc(p.name)+'</div>'+
+            (p.location?'<div class="cl">'+esc(p.location)+'</div>':'')+
+            '<span class="badge '+esc(p.status)+'">'+esc(st.l)+'</span>'+
+            (p.description?'<div class="desc">'+esc(p.description)+'</div>':'<div class="desc"></div>')+
+            '<div class="acts">'+(acts||'<span class="cl">Sin recursos aún</span>')+'</div>'+
+          '</div>';
+        });
+        html+='</div>';
+        content.innerHTML=html;
+      });
+  }
+})();
+</script>
+</body>
+</html>
