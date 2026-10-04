@@ -182,6 +182,74 @@
   .wa-fab{position:fixed;right:18px;bottom:18px;z-index:60;width:54px;height:54px;border-radius:50%;background:#25D366;color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(0,0,0,.35);transition:transform .25s,box-shadow .25s;}
   .wa-fab:hover{transform:scale(1.08);box-shadow:0 8px 26px rgba(37,211,102,.5);}
   @media(max-width:680px){.wa-fab{width:50px;height:50px;right:14px;bottom:14px;}}
+
+  /* proyectos */
+  .proj-list{margin-top:60px;display:flex;flex-direction:column;gap:clamp(56px,8vw,110px);}
+  .proj{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:clamp(28px,4vw,60px);align-items:center;}
+  .proj.rev{grid-template-columns:minmax(0,1fr) minmax(0,1.55fr);}
+  .proj.rev .proj-fig{order:2;}
+  .proj-fig{margin:0;}
+  .proj-shot{position:relative;display:block;width:100%;padding:0;border:1px solid var(--hair);border-radius:8px;overflow:hidden;background:#0c0b0a;cursor:zoom-in;transition:border-color .4s;}
+  .proj-shot img{display:block;width:100%;height:auto;transition:transform 1.2s cubic-bezier(.2,.7,.2,1),filter .6s;filter:saturate(.92);}
+  .proj-shot:hover{border-color:var(--turquesa);}
+  .proj-shot:hover img{transform:scale(1.025);filter:saturate(1);}
+  .proj-shot:focus-visible{outline:2px solid var(--turquesa-bright);outline-offset:3px;}
+  .proj-hud{position:absolute;top:12px;left:14px;font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--beige);background:rgba(10,9,8,.72);padding:6px 10px;border-radius:999px;pointer-events:none;}
+  .proj-hud .tvk{color:var(--turquesa-bright);}
+  .proj-zoom{position:absolute;right:12px;bottom:12px;font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--void);background:var(--turquesa);padding:7px 12px;border-radius:999px;opacity:0;transform:translateY(6px);transition:.35s;pointer-events:none;}
+  .proj-shot:hover .proj-zoom,.proj-shot:focus-visible .proj-zoom{opacity:1;transform:none;}
+  .proj-fig figcaption{margin-top:14px;font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--beige-faint);}
+  .proj-body .idx{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--cobre);letter-spacing:.14em;text-transform:uppercase;}
+  .proj-body h3{font-size:clamp(1.4rem,2.4vw,2rem);font-weight:200;margin:14px 0 16px;letter-spacing:-.01em;line-height:1.15;}
+  .proj-body .d{color:var(--beige-dim);font-size:.98rem;margin-bottom:24px;}
+  .proj-meta{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--hair);border:1px solid var(--hair);border-radius:12px;overflow:hidden;margin-bottom:26px;}
+  .proj-meta>div{background:rgba(10,9,8,.6);padding:14px 16px;}
+  .proj-meta .v{font-weight:200;font-size:1.15rem;letter-spacing:-.01em;color:var(--beige);}
+  .proj-meta .l{font-family:"JetBrains Mono",monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--beige-faint);margin-top:4px;}
+  .proj-body ul{list-style:none;display:flex;flex-direction:column;gap:9px;}
+  .proj-body li{font-family:"JetBrains Mono",monospace;font-size:11.5px;letter-spacing:.02em;color:var(--beige-dim);padding-left:18px;position:relative;line-height:1.55;}
+  .proj-body li::before{content:"";position:absolute;left:0;top:6px;width:6px;height:6px;border:1px solid var(--turquesa);transform:rotate(45deg);}
+  .proj-cta{margin-top:clamp(56px,7vw,90px);padding-top:36px;border-top:1px solid var(--hair);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px;}
+  .proj-cta p{color:var(--beige-dim);font-weight:200;font-size:clamp(1rem,1.6vw,1.2rem);max-width:52ch;}
+  @media(max-width:960px){.proj,.proj.rev{grid-template-columns:1fr;}.proj.rev .proj-fig{order:0;}}
+  @media(max-width:420px){.proj-meta{grid-template-columns:1fr;}}
+
+
+  .proj-reel{margin:54px 0 0;max-width:880px;}
+  .proj-reel .rv{position:relative;border:1px solid var(--hair);border-radius:8px;overflow:hidden;background:#0c0b0a;aspect-ratio:16/9;}
+  .proj-reel video{display:block;width:100%;height:100%;object-fit:cover;}
+  .proj-reel figcaption{margin-top:14px;font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--beige-faint);}
+  .proj-shot.fixed{aspect-ratio:3/2;}
+  .proj-shot.fixed picture,.proj-shot.fixed img{width:100%;height:100%;}
+  .proj-shot.fixed img{object-fit:contain;}
+  .proj-thumbs{display:flex;gap:10px;margin-top:12px;}
+  .proj-th{width:84px;height:60px;padding:0;border:1px solid var(--hair);border-radius:6px;overflow:hidden;background:#0c0b0a;cursor:pointer;opacity:.55;transition:opacity .3s,border-color .3s;}
+  .proj-th img{display:block;width:100%;height:100%;object-fit:cover;}
+  .proj-th:hover{opacity:.85;}
+  .proj-th.is-on{opacity:1;border-color:var(--turquesa);}
+  .proj-th:focus-visible{outline:2px solid var(--turquesa-bright);outline-offset:2px;}
+
+
+  /* equipamiento */
+  .equip-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--hair);border:1px solid var(--hair);border-radius:14px;overflow:hidden;margin-top:54px;}
+  .equip{background:rgba(10,9,8,.6);padding:clamp(24px,2.8vw,36px);transition:background .4s;}
+  .equip:hover{background:rgba(31,26,20,.5);}
+  .equip .et{font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--cobre);}
+  .equip h4{font-size:clamp(1.2rem,2vw,1.55rem);font-weight:200;margin:12px 0 12px;letter-spacing:-.01em;color:var(--beige);}
+  .equip p{color:var(--beige-dim);font-size:.95rem;font-weight:300;line-height:1.55;}
+  .equip p b{color:var(--beige);font-weight:400;}
+  @media(max-width:880px){.equip-grid{grid-template-columns:1fr;}}
+
+  /* lightbox */
+  .lb{position:fixed;inset:0;z-index:100;background:rgba(10,9,8,.94);display:none;align-items:center;justify-content:center;padding:clamp(12px,3vw,40px);}
+  .lb.open{display:flex;}
+  .lb-stage{position:relative;max-width:100%;max-height:100%;overflow:auto;-webkit-overflow-scrolling:touch;border-radius:6px;}
+  .lb-stage img{display:block;max-width:min(1700px,94vw);max-height:86vh;width:auto;height:auto;cursor:zoom-in;transition:max-width .3s;}
+  .lb-stage.zoomed img{max-width:none;max-height:none;width:min(3000px,190vw);cursor:zoom-out;}
+  .lb-cap{position:absolute;left:clamp(12px,3vw,40px);bottom:14px;right:80px;font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--beige-dim);}
+  .lb-close{position:absolute;top:14px;right:16px;width:44px;height:44px;border-radius:50%;border:1px solid var(--hair);background:rgba(10,9,8,.7);color:var(--beige);font-size:22px;line-height:1;cursor:pointer;font-family:inherit;}
+  .lb-close:hover{border-color:var(--turquesa);color:var(--turquesa-bright);}
+  body.lb-lock{overflow:hidden;}
 </style>
 </head>
 <body>
@@ -193,6 +261,7 @@
     <div class="brand"><span class="logo-chip"><span class="apa-logo"></span></span></div>
     <div class="navlinks">
       <a href="#servicios">Servicios</a>
+      <a href="#proyectos">Proyectos</a>
       <a href="#manifiesto">Manifiesto</a>
       <a href="#tecnologia">Tecnologia</a>
       <a href="#proceso">Proceso</a>
@@ -233,7 +302,7 @@
 
     <!-- SERVICIOS -->
     <section id="servicios" class="block veil">
-      <div class="sec-label anim">01 — Servicios</div>
+      <div class="sec-label anim">01 · Servicios</div>
       <h2 class="sec-head anim">Levantamiento <em>especializado</em> para cada terreno.</h2>
       <p class="sec-intro anim">No vendemos vuelos. Entregamos datos georreferenciados con interpretación técnica realizada por geólogo titulado. Cada proyecto combina precisión RTK con lectura del terreno que el operador de dron promedio no puede ofrecer.</p>
       <div class="svc-grid">
@@ -379,9 +448,94 @@
       </div>
     </section>
 
+    <!-- PROYECTOS -->
+    <section id="proyectos" class="block veil">
+      <div class="sec-label anim">02 · Proyectos</div>
+      <h2 class="sec-head anim">Terreno <em>levantado</em>, territorio <em>leído.</em></h2>
+      <p class="sec-intro anim">Una muestra de trabajos recientes. En cada uno, el producto fotogramétrico viene acompañado de la interpretación geológica y geotécnica que le da sentido: el dato y su lectura, en una sola entrega.</p>
+
+      <figure class="proj-reel anim">
+        <div class="rv"><video id="projReel" autoplay muted loop playsinline preload="metadata" poster="assets/proyectos/apacheta-analisis-poster.jpg" aria-label="Animación del análisis geotécnico sobre el modelo 3D: discontinuidades, sectores críticos y clasificación del macizo"><source src="assets/proyectos/apacheta-analisis.mp4" type="video/mp4"></video></div>
+        <figcaption>Del modelo 3D a la clasificación del macizo · Discontinuidades · Sectores críticos · Dominio geotécnico</figcaption>
+      </figure>
+
+      <div class="proj-list">
+        <article class="proj">
+          <figure class="proj-fig anim">
+            <button type="button" class="proj-shot" id="shot01" data-full="assets/proyectos/talud-urbano-planos.jpg" data-cap="Caso 01 · Planos estructurales F01, J01, J02 y J03 sobre el modelo del terreno" aria-label="Ampliar imagen del caso 01">
+              <picture><source srcset="assets/proyectos/talud-urbano-planos.webp" type="image/webp"><img src="assets/proyectos/talud-urbano-planos.jpg" width="2400" height="1314" loading="lazy" decoding="async" alt="Cuatro vistas del talud con el plano estructural F01 y las familias J01, J02 y J03 representadas sobre el modelo del terreno, con estereograma y rosa de rumbos"></picture>
+              <span class="proj-zoom">Ampliar</span>
+            </button>
+            <div class="proj-thumbs" data-target="shot01">
+              <button type="button" class="proj-th is-on" data-name="talud-urbano-planos" data-w="2400" data-h="1314" data-cap="Caso 01 · Planos estructurales F01, J01, J02 y J03 sobre el modelo del terreno" data-alt="Cuatro vistas del talud con el plano estructural F01 y las familias J01, J02 y J03 representadas sobre el modelo del terreno, con estereograma y rosa de rumbos" aria-label="Ver planos estructurales"><img src="assets/proyectos/talud-urbano-planos-th.webp" alt="" loading="lazy"></button>
+              <button type="button" class="proj-th" data-name="talud-urbano-gt01" data-w="1774" data-h="887" data-cap="Caso 01 · Análisis cinemático y dominio geotécnico GT-01" data-alt="Talud rocoso bajo edificaciones con familias J1, J2 y J3, estereograma de polos, análisis cinemático, tabla del dominio geotécnico GT-01 y mapa de pendientes" aria-label="Ver análisis cinemático y dominio GT-01"><img src="assets/proyectos/talud-urbano-gt01-th.webp" alt="" loading="lazy"></button>
+            </div>
+            <figcaption>Planos estructurales · Discontinuidades · Cinemática · Dominio GT-01</figcaption>
+          </figure>
+          <div class="proj-body anim">
+            <div class="idx">Caso 01 · Geología y Geotecnia</div>
+            <h3>Caracterización geotécnica de talud urbano</h3>
+            <p class="d">Levantamiento fotogramétrico de un talud rocoso junto a una vía pública, con viviendas en su coronamiento. Sobre el modelo 3D representamos los planos estructurales, medimos las familias de discontinuidades, caracterizamos el dominio geotécnico y evaluamos el mecanismo de falla potencial.</p>
+            <div class="proj-meta">
+              <div><div class="v">64</div><div class="l">RMR89 · GT-01</div></div>
+              <div><div class="v">60 a 65</div><div class="l">GSI · GT-01</div></div>
+              <div><div class="v">78 %</div><div class="l">RQD</div></div>
+              <div><div class="v">85 MPa</div><div class="l">UCS</div></div>
+            </div>
+            <ul>
+              <li>Plano estructural F01 representado sobre el modelo del terreno</li>
+              <li>Familias J01, J02 y J03 por sector, con estereograma y rosa de rumbos</li>
+              <li>Orientaciones J1 65/326, J2 66/142 y J3 35/355 (manteo / dirección de manteo)</li>
+              <li>Análisis cinemático: mecanismo potencial en cuña</li>
+              <li>Dominio GT-01 con espaciamiento de juntas de 0,4 a 0,8 m</li>
+              <li>Mapa de pendientes, zona fracturada y bloques potencialmente inestables</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="proj rev">
+          <figure class="proj-fig anim">
+            <button type="button" class="proj-shot" id="shot02" data-full="assets/proyectos/cantera-laminas-dem.jpg" data-cap="Caso 02 · Productos RPAS: DEM, cuenca aportante, geomorfología, ortomosaico, pared y pendientes" aria-label="Ampliar imagen del caso 02">
+              <picture><source srcset="assets/proyectos/cantera-laminas-dem.webp" type="image/webp"><img src="assets/proyectos/cantera-laminas-dem.jpg" width="1536" height="1024" loading="lazy" decoding="async" alt="Seis láminas: modelo digital de elevación, cuenca aportante de 38,1 ha, análisis geomorfológico, ortomosaico RPAS, discos estructurales en la pared de la cantera y mapa de pendientes"></picture>
+              <span class="proj-zoom">Ampliar</span>
+            </button>
+            <div class="proj-thumbs" data-target="shot02">
+              <button type="button" class="proj-th is-on" data-name="cantera-laminas-dem" data-w="1536" data-h="1024" data-cap="Caso 02 · Productos RPAS: DEM, cuenca aportante, geomorfología, ortomosaico, pared y pendientes" data-alt="Seis láminas: modelo digital de elevación, cuenca aportante de 38,1 ha, análisis geomorfológico, ortomosaico RPAS, discos estructurales en la pared de la cantera y mapa de pendientes" aria-label="Ver láminas de productos RPAS"><img src="assets/proyectos/cantera-laminas-dem-th.webp" alt="" loading="lazy"></button>
+              <button type="button" class="proj-th" data-name="cantera-pared-gt02" data-w="1942" data-h="810" data-cap="Caso 02 · Pared de cantera: discontinuidades y dominio geotécnico GT-02" data-alt="Pared de cantera con familias de discontinuidades J1A, J1B, J2 y J3, estereograma de polos, análisis cinemático y tabla del dominio geotécnico GT-02" aria-label="Ver pared de cantera y dominio GT-02"><img src="assets/proyectos/cantera-pared-gt02-th.webp" alt="" loading="lazy"></button>
+            </div>
+            <figcaption>DEM · Cuenca aportante · Geomorfología · Ortomosaico · Pared GT-02 · Estereograma</figcaption>
+          </figure>
+          <div class="proj-body anim">
+            <div class="idx">Caso 02 · Minería y áridos</div>
+            <h3>Levantamiento RPAS y caracterización geotécnica de cantera</h3>
+            <p class="d">Vuelo RPAS sobre una cantera y su entorno. Con el ortomosaico y el modelo de elevación leímos el relieve y la hidrología superficial, y sobre el modelo 3D de la pared medimos las familias de discontinuidades, caracterizamos el dominio geotécnico y evaluamos los mecanismos de falla potenciales.</p>
+            <div class="proj-meta">
+              <div><div class="v">38,1 ha</div><div class="l">Cuenca aportante</div></div>
+              <div><div class="v">6 cm/px</div><div class="l">GSD</div></div>
+              <div><div class="v">58</div><div class="l">RMR89 · GT-02</div></div>
+              <div><div class="v">50 a 65</div><div class="l">GSI · GT-02</div></div>
+            </div>
+            <ul>
+              <li>Ortomosaico georreferenciado y DEM con relieve sombreado (UTM 19S, WGS84)</li>
+              <li>Cuenca aportante al rajo, red de drenaje y dirección de flujo</li>
+              <li>Pendientes, exposición de laderas y unidades geomorfológicas (TPI)</li>
+              <li>Familias J1A, J1B, J2 y J3 en la pared, con estereograma de polos</li>
+              <li>Dominio GT-02: RQD 72 %, UCS 90 MPa, espaciamiento de 0,2 a 1,0 m</li>
+              <li>Mecanismos potenciales: cuña, deslizamiento planar y volcamiento de bloques</li>
+            </ul>
+          </div>
+        </article>
+      </div>
+
+      <div class="proj-cta anim">
+        <p>¿Tienes un talud, una cantera o un predio que necesitas entender? Conversemos sobre qué entregables le sirven a tu equipo.</p>
+        <a href="#contacto" class="cmethod primary">Cotizar un levantamiento</a>
+      </div>
+    </section>
+
     <!-- MANIFIESTO -->
     <section id="manifiesto" class="block veil">
-      <div class="sec-label anim">02 — Manifiesto</div>
+      <div class="sec-label anim">03 · Manifiesto</div>
       <h2 class="sec-head anim">De la <em>piedra</em> al <em>dato.</em></h2>
       <div class="mani-body">
         <div class="mani-figure anim"><picture><source srcset="assets/apacheta-dron.webp" type="image/webp"><img src="assets/apacheta-dron.jpg" width="820" height="1025" loading="lazy" decoding="async" alt="Apacheta y dron al atardecer en la cordillera"></picture></div>
@@ -399,21 +553,26 @@
 
     <!-- TECNOLOGIA -->
     <section id="tecnologia" class="block veil">
-      <div class="sec-label anim">03 — Tecnología</div>
+      <div class="sec-label anim">04 · Tecnología</div>
       <h2 class="sec-head anim">Equipamiento <em>profesional</em>, procesos validados.</h2>
-      <p class="sec-intro anim">Operamos con DJI Matrice 4E RTK, el estándar profesional para fotogrametría aérea. Procesamos en DJI Terra, Pix4D y Agisoft Metashape, con validación mediante puntos de control terrestre (GCPs) y precisión documentada.</p>
+      <p class="sec-intro anim">Operamos con DJI Matrice 4E RTK, el estándar profesional para fotogrametría aérea, junto a la estación D-RTK 3 y el computador de a bordo Manifold 3. Procesamos en DJI Terra, Pix4D y Agisoft Metashape, con validación mediante puntos de control terrestre (GCPs) y precisión documentada.</p>
       <div class="statrow">
         <div class="stat anim"><div class="n">±2<small>cm</small></div><div class="l">Precisión horizontal RTK</div></div>
         <div class="stat anim"><div class="n">1.5<small>cm/px</small></div><div class="l">GSD a 50 m</div></div>
         <div class="stat anim"><div class="n">100<small>MP</small></div><div class="l">Resolución de imagen</div></div>
         <div class="stat anim"><div class="n">400<small>ha/día</small></div><div class="l">Cobertura por jornada</div></div>
       </div>
+      <div class="equip-grid">
+        <div class="equip anim"><div class="et">Aeronave</div><h4>DJI Matrice 4E RTK</h4><p>Sensor de <b>100 MP</b> con RTK integrado (GSD de 1,5 cm/px a 50 m, hasta 400 ha por jornada). Resolución para mapear estructuras finas y grietas que el mapeo convencional no alcanza, cubriendo el talud completo en <b>una sola salida</b>.</p></div>
+        <div class="equip anim"><div class="et">Estación base</div><h4>D-RTK 3</h4><p>Georreferencia cada punto en coordenadas reales con <b>precisión centimétrica</b>. Orientaciones (manteo y dirección de manteo) confiables e integrables directo a su malla mina y modelos.</p></div>
+        <div class="equip anim"><div class="et">Cómputo a bordo</div><h4>Manifold 3</h4><p><b>Vuelo autónomo y modelo 3D en tiempo real</b>, para cubrir taludes complejos completos sin exponer personal a zonas inestables y procesar en terreno.</p></div>
+      </div>
       <figure class="tech-figure anim"><div class="techviz"><canvas id="techgl"></canvas><div class="techviz-hud"><span class="tvk">● LIVE</span> CAPTURA RTK · MODELO DE ELEVACIÓN</div></div></figure>
     </section>
 
     <!-- PROCESO -->
     <section id="proceso" class="block veil">
-      <div class="sec-label anim">04 — Proceso</div>
+      <div class="sec-label anim">05 · Proceso</div>
       <h2 class="sec-head anim">De la <em>solicitud</em> al dato accionable.</h2>
       <p class="sec-intro anim">Un proceso estructurado de cuatro etapas, con plazos definidos, hitos de validación y entregables claros en cada paso.</p>
       <div class="steps">
@@ -426,7 +585,7 @@
 
     <!-- ENTREGABLES -->
     <section class="block veil">
-      <div class="sec-label anim">05 — Entregables</div>
+      <div class="sec-label anim">06 · Entregables</div>
       <h2 class="sec-head anim">Datos en los <em>formatos</em> que tu equipo ya usa.</h2>
       <p class="sec-intro anim">Entregamos en los formatos estándar de la industria, listos para abrir en AutoCAD Civil 3D, Leapfrog, Vulcan, ArcGIS o QGIS. Sistema de referencia WGS84 / UTM 19S, o el que tu equipo necesite.</p>
       <div class="fmt-grid">
@@ -444,7 +603,7 @@
 
     <!-- CONTACTO -->
     <section id="contacto" class="block veil contact">
-      <div class="sec-label anim">06 — Contacto</div>
+      <div class="sec-label anim">07 · Contacto</div>
       <h2 class="sec-head anim">Hablemos de tu <em>terreno.</em></h2>
       <div class="contact-layout">
         <div class="contact-info">
@@ -784,6 +943,35 @@
         note.innerHTML='// No se pudo enviar. Escr\u00edbenos a <a href=\"mailto:contacto@apachetaaerial.com\" style=\"color:#46C7BE\">contacto@apachetaaerial.com</a> o por WhatsApp.'; })
       .finally(function(){ if(btn){btn.disabled=false;} });
   });
+})();
+</script>
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Imagen ampliada"><button type="button" class="lb-close" id="lbClose" aria-label="Cerrar">×</button><div class="lb-stage" id="lbStage"><img id="lbImg" alt=""></div><div class="lb-cap" id="lbCap"></div></div>
+<script>
+(function(){
+  var lb=document.getElementById('lb'),img=document.getElementById('lbImg'),stage=document.getElementById('lbStage'),cap=document.getElementById('lbCap'),last=null;
+  function open(b){last=b;img.src=b.getAttribute('data-full');img.alt=b.querySelector('img').alt;cap.textContent=b.getAttribute('data-cap')||'';stage.classList.remove('zoomed');lb.classList.add('open');document.body.classList.add('lb-lock');document.getElementById('lbClose').focus();}
+  function close(){lb.classList.remove('open');document.body.classList.remove('lb-lock');img.removeAttribute('src');if(last)last.focus();}
+  document.querySelectorAll('.proj-shot').forEach(function(b){b.addEventListener('click',function(){open(b);});});
+  document.getElementById('lbClose').addEventListener('click',close);
+  lb.addEventListener('click',function(e){if(e.target===lb)close();});
+  img.addEventListener('click',function(e){e.stopPropagation();stage.classList.toggle('zoomed');});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&lb.classList.contains('open'))close();});
+})();
+</script>
+<script>
+(function(){
+  document.querySelectorAll('.proj-thumbs').forEach(function(g){
+    var shot=document.getElementById(g.getAttribute('data-target'));
+    g.querySelectorAll('.proj-th').forEach(function(b){b.addEventListener('click',function(){
+      var n='assets/proyectos/'+b.getAttribute('data-name');
+      shot.querySelector('source').srcset=n+'.webp';
+      var im=shot.querySelector('img');im.src=n+'.jpg';im.width=+b.getAttribute('data-w');im.height=+b.getAttribute('data-h');im.alt=b.getAttribute('data-alt');
+      shot.setAttribute('data-full',n+'.jpg');shot.setAttribute('data-cap',b.getAttribute('data-cap'));
+      g.querySelectorAll('.proj-th').forEach(function(x){x.classList.toggle('is-on',x===b);});
+    });});
+  });
+  var v=document.getElementById('projReel');
+  if(v&&window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches){v.removeAttribute('autoplay');v.pause();v.controls=true;}
 })();
 </script>
 </body>
